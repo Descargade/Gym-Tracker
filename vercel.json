@@ -1,8 +1,8 @@
 {
-  "buildCommand": "cd artifacts/mobile && npx expo export --platform web",
   "outputDirectory": "artifacts/mobile/dist",
   "framework": null,
   "installCommand": "corepack enable && corepack prepare pnpm@10.33.4 --activate && pnpm install --no-frozen-lockfile",
+  "buildCommand": "cd artifacts/mobile && npx expo export --platform web",
   "cleanUrls": true,
   "rewrites": [
     { "source": "/history", "destination": "/history.html" },

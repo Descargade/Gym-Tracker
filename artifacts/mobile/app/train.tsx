@@ -11,6 +11,13 @@ import { Workout, WorkoutSet } from '@/types/models';
 const clock = (seconds: number) => `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
 const duration = (seconds: number) => `${Math.floor(seconds / 60)} min`;
 
+type ConfirmDialog = {
+  title: string;
+  message: string;
+  confirmLabel?: string;
+  onConfirm: () => void;
+} | null;
+
 export default function TrainScreen() {
   const colors = useColors();
   const { routineId } = useLocalSearchParams<{ routineId?: string }>();
@@ -59,12 +66,41 @@ export default function TrainScreen() {
   return <TrainingSession onFinished={(workout) => setFinishedWorkout(workout)} />;
 }
 
+function ConfirmModal({ dialog, colors, onCancel }: { dialog: ConfirmDialog; colors: ReturnType<typeof useColors>; onCancel: () => void }) {
+  if (!dialog) return null;
+  return (
+    <Modal visible transparent animationType="fade" onRequestClose={onCancel}>
+      <Pressable style={confirmStyles.backdrop} onPress={onCancel}>
+        <Pressable style={[confirmStyles.card, { backgroundColor: colors.card }]} onPress={() => {}}>
+          <Text style={[confirmStyles.title, { color: colors.foreground }]}>{dialog.title}</Text>
+          <Text style={[confirmStyles.message, { color: colors.mutedForeground }]}>{dialog.message}</Text>
+          <View style={confirmStyles.actions}>
+            <Pressable onPress={onCancel} style={[confirmStyles.btn, { backgroundColor: colors.secondary }]}><Text style={[confirmStyles.btnText, { color: colors.foreground }]}>Cancelar</Text></Pressable>
+            <Pressable onPress={() => { dialog.onConfirm(); onCancel(); }} style={[confirmStyles.btn, { backgroundColor: colors.destructive }]}><Text style={[confirmStyles.btnText, { color: colors.destructiveForeground }]}>{dialog.confirmLabel || 'Confirmar'}</Text></Pressable>
+          </View>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
+const confirmStyles = StyleSheet.create({
+  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.62)', justifyContent: 'center', alignItems: 'center', padding: 24 },
+  card: { width: '100%', maxWidth: 360, borderRadius: 20, padding: 24 },
+  title: { fontSize: 18, fontWeight: '800', textAlign: 'center' },
+  message: { fontSize: 14, textAlign: 'center', marginTop: 10, lineHeight: 20 },
+  actions: { flexDirection: 'row', gap: 10, marginTop: 22 },
+  btn: { flex: 1, minHeight: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  btnText: { fontSize: 14, fontWeight: '700' },
+});
+
 function TrainingSession({ onFinished }: { onFinished: (workout: Workout) => void }) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { activeWorkout, routines, exercises, settings, getPreviousSets, getBestWeight, completeSet, editSet, deleteSet, setCurrentExercise, startRest, pauseRest, addRestSeconds, skipRest, finishWorkout, cancelWorkout } = useGym();
   const [now, setNow] = useState(Date.now());
   const [editingSet, setEditingSet] = useState<{ exerciseId: string; set: WorkoutSet } | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialog>(null);
   const workout = activeWorkout!;
   const routine = routines.find((item) => item.id === workout.routineId);
   const current = workout.exercises[workout.currentExerciseIndex];
@@ -107,6 +143,7 @@ function TrainingSession({ onFinished }: { onFinished: (workout: Workout) => voi
     setReps('');
     if (parsedWeight > previousBest) Alert.alert('Nuevo récord personal', `${currentExercise.name}: ${parsedWeight} ${settings.weightUnit}`, [{ text: 'Seguir entrenando' }]);
   };
+
   const finish = () => {
     const pending = plannedSets > totalSets;
     const action = () => {
@@ -114,11 +151,19 @@ function TrainingSession({ onFinished }: { onFinished: (workout: Workout) => voi
       const finished = finishWorkout();
       if (finished) onFinished(finished);
     };
-    if (pending) Alert.alert('¿Querés finalizar el entrenamiento?', 'Todavía quedan series sin registrar.', [{ text: 'Cancelar', style: 'cancel' }, { text: 'Finalizar', style: 'destructive', onPress: action }]); else action();
+    if (pending) {
+      setConfirmDialog({ title: '¿Querés finalizar?', message: 'Todavía quedan series sin registrar.', confirmLabel: 'Finalizar', onConfirm: action });
+    } else {
+      action();
+    }
+  };
+
+  const exit = () => {
+    setConfirmDialog({ title: '¿Salir del entrenamiento?', message: 'El entrenamiento actual todavía no terminó. Se perderá el progreso.', confirmLabel: 'Salir', onConfirm: () => { skipRest(); cancelWorkout(); router.back(); } });
   };
 
   return <View style={[styles.root, { backgroundColor: colors.background }]}>
-    <View style={[styles.topBar, { paddingTop: insets.top + 8, borderBottomColor: colors.border }]}><IconButton icon="x" label="Salir" onPress={() => Alert.alert('¿Querés salir del entrenamiento?', 'El entrenamiento actual todavía no terminó.', [{ text: 'Continuar entrenando', style: 'cancel' }, { text: 'Salir', style: 'destructive', onPress: () => { skipRest(); cancelWorkout(); router.back(); } }])} /><View style={styles.topCopy}><Text style={[styles.topTitle, { color: colors.foreground }]}>{workout.routineName}</Text><Text style={[styles.topMeta, { color: colors.mutedForeground }]}>{clock(elapsed)} · {totalSets}/{plannedSets} series</Text></View><Pressable onPress={finish} style={({ pressed }) => [styles.finishBtn, { opacity: pressed ? 0.7 : 1 }]}><Text style={[styles.finishText, { color: colors.primary }]}>Finalizar</Text></Pressable></View>
+    <View style={[styles.topBar, { paddingTop: insets.top + 8, borderBottomColor: colors.border }]}><IconButton icon="x" label="Salir" onPress={exit} /><View style={styles.topCopy}><Text style={[styles.topTitle, { color: colors.foreground }]}>{workout.routineName}</Text><Text style={[styles.topMeta, { color: colors.mutedForeground }]}>{clock(elapsed)} · {totalSets}/{plannedSets} series</Text></View><Pressable onPress={finish} style={({ pressed }) => [styles.finishBtn, { opacity: pressed ? 0.7 : 1 }]}><Text style={[styles.finishText, { color: colors.primary }]}>Finalizar</Text></Pressable></View>
     {workout.restTimer ? <RestPanel remaining={restRemaining} paused={workout.restTimer.isPaused} onPause={pauseRest} onAdd={() => addRestSeconds(15)} onSkip={skipRest} /> : <Screen><View style={styles.exerciseHeader}><Text style={[styles.exerciseGroup, { color: colors.primary }]}>{currentExercise.group.toUpperCase()}</Text><Text style={[styles.exerciseName, { color: colors.foreground }]}>{currentExercise.name}</Text><Text style={[styles.exerciseMeta, { color: colors.mutedForeground }]}>{workout.currentExerciseIndex + 1} de {workout.exercises.length} · {routineItem.sets} series objetivo · {routineItem.restSeconds}s descanso</Text></View>
       <View style={[styles.previousCard, { backgroundColor: colors.card, borderColor: colors.border }]}><View style={styles.previousHeading}><Feather name="rotate-ccw" size={15} color={colors.primary} /><Text style={[styles.previousTitle, { color: colors.foreground }]}>Último entrenamiento</Text></View>{previousSets.length ? <View style={styles.previousSets}>{previousSets.map((set) => <Text style={[styles.previousSet, { color: colors.mutedForeground }]} key={set.id}>{set.weight} {settings.weightUnit} × {set.reps}</Text>)}</View> : <Text style={[styles.previousSet, { color: colors.mutedForeground }]}>No hay registros anteriores.</Text>}</View>
       <View style={styles.inputRow}><View style={styles.inputHalf}><Field label={`Peso (${settings.weightUnit})`} value={weight} onChangeText={setWeight} placeholder="0" keyboardType="decimal-pad" /></View><View style={styles.inputHalf}><Field label="Repeticiones" value={reps} onChangeText={setReps} placeholder={routineItem.targetReps} keyboardType="numeric" /></View></View>
@@ -128,6 +173,7 @@ function TrainingSession({ onFinished }: { onFinished: (workout: Workout) => voi
       <View style={styles.exerciseNav}>{<Button label="Anterior" icon="chevron-left" variant="ghost" disabled={workout.currentExerciseIndex === 0} onPress={() => setCurrentExercise(workout.currentExerciseIndex - 1)} />}{<Button label={workout.currentExerciseIndex === workout.exercises.length - 1 ? 'Repetir ejercicio' : 'Siguiente'} icon="chevron-right" variant="secondary" onPress={() => setCurrentExercise((workout.currentExerciseIndex + 1) % workout.exercises.length)} />}</View>
     </Screen>}
     <Modal visible={editingSet !== null} transparent animationType="slide" onRequestClose={() => setEditingSet(null)}>{editingSet ? <SetEditor exerciseId={editingSet.exerciseId} set={editingSet.set} onClose={() => setEditingSet(null)} onSave={(nextWeight, nextReps) => { editSet(editingSet.exerciseId, editingSet.set.id, nextWeight, nextReps); setEditingSet(null); }} onDelete={() => { deleteSet(editingSet.exerciseId, editingSet.set.id); setEditingSet(null); }} /> : null}</Modal>
+    <ConfirmModal dialog={confirmDialog} colors={colors} onCancel={() => setConfirmDialog(null)} />
   </View>;
 }
 
@@ -141,7 +187,21 @@ function SetEditor({ set, onClose, onSave, onDelete }: { exerciseId: string; set
   const colors = useColors();
   const [weight, setWeight] = useState(String(set.weight));
   const [reps, setReps] = useState(String(set.reps));
-  return <View style={styles.modalBackdrop}><View style={[styles.setModal, { backgroundColor: colors.card }]}><View style={styles.modalHeader}><Text style={[styles.modalTitle, { color: colors.foreground }]}>Editar serie {set.setNumber}</Text><IconButton icon="x" label="Cerrar" onPress={onClose} /></View><Field label="Peso" value={weight} onChangeText={setWeight} keyboardType="decimal-pad" /><Field label="Repeticiones" value={reps} onChangeText={setReps} keyboardType="numeric" /><Button label="Guardar cambios" icon="check" onPress={() => onSave(Number(weight.replace(',', '.')), Number(reps))} /><Button label="Eliminar serie" icon="trash-2" variant="danger" onPress={() => Alert.alert('Eliminar serie', '¿Seguro que quieres eliminarla?', [{ text: 'Cancelar', style: 'cancel' }, { text: 'Eliminar', style: 'destructive', onPress: onDelete }])} /></View></View>;
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  return <View style={styles.modalBackdrop}><View style={[styles.setModal, { backgroundColor: colors.card }]}><View style={styles.modalHeader}><Text style={[styles.modalTitle, { color: colors.foreground }]}>Editar serie {set.setNumber}</Text><IconButton icon="x" label="Cerrar" onPress={onClose} /></View><Field label="Peso" value={weight} onChangeText={setWeight} keyboardType="decimal-pad" /><Field label="Repeticiones" value={reps} onChangeText={setReps} keyboardType="numeric" /><Button label="Guardar cambios" icon="check" onPress={() => onSave(Number(weight.replace(',', '.')), Number(reps))} /><Button label="Eliminar serie" icon="trash-2" variant="danger" onPress={() => setConfirmDelete(true)} /></View>
+    <Modal visible={confirmDelete} transparent animationType="fade" onRequestClose={() => setConfirmDelete(false)}>
+      <Pressable style={confirmStyles.backdrop} onPress={() => setConfirmDelete(false)}>
+        <Pressable style={[confirmStyles.card, { backgroundColor: colors.card }]} onPress={() => {}}>
+          <Text style={[confirmStyles.title, { color: colors.foreground }]}>Eliminar serie</Text>
+          <Text style={[confirmStyles.message, { color: colors.mutedForeground }]}>¿Seguro que quieres eliminarla?</Text>
+          <View style={confirmStyles.actions}>
+            <Pressable onPress={() => setConfirmDelete(false)} style={[confirmStyles.btn, { backgroundColor: colors.secondary }]}><Text style={[confirmStyles.btnText, { color: colors.foreground }]}>Cancelar</Text></Pressable>
+            <Pressable onPress={() => { setConfirmDelete(false); onDelete(); }} style={[confirmStyles.btn, { backgroundColor: colors.destructive }]}><Text style={[confirmStyles.btnText, { color: colors.destructiveForeground }]}>Eliminar</Text></Pressable>
+          </View>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  </View>;
 }
 
 const styles = StyleSheet.create({
