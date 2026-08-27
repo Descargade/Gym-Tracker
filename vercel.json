@@ -2,5 +2,13 @@
   "buildCommand": "cd artifacts/mobile && npx expo export --platform web",
   "outputDirectory": "artifacts/mobile/dist",
   "framework": null,
-  "installCommand": "corepack enable && corepack prepare pnpm@10.33.4 --activate && pnpm install --no-frozen-lockfile"
+  "installCommand": "corepack enable && corepack prepare pnpm@10.33.4 --activate && pnpm install --no-frozen-lockfile",
+  "rewrites": [
+    { "source": "/history", "destination": "/(tabs)/history.html" },
+    { "source": "/progress", "destination": "/(tabs)/progress.html" },
+    { "source": "/routines", "destination": "/(tabs)/routines.html" },
+    { "source": "/exercises", "destination": "/(tabs)/exercises.html" },
+    { "source": "/settings", "destination": "/settings.html" },
+    { "source": "/train", "destination": "/train.html" }
+  ]
 }
