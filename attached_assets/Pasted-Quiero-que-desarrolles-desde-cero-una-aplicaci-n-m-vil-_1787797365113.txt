@@ -1,0 +1,978 @@
+Quiero que desarrolles desde cero una aplicación móvil llamada **Gym Tracker**.
+
+La aplicación será un tracker personal de gimnasio para registrar mis rutinas, ejercicios, pesos, repeticiones, series y descansos.
+
+## IMPORTANTE
+
+Quiero que la aplicación esté diseñada **EXCLUSIVAMENTE pensando en dispositivos móviles**.
+
+El dispositivo principal será un teléfono Android o iPhone.
+
+NO quiero que diseñes primero una página web de escritorio y después la hagas responsive.
+
+Quiero una experiencia **mobile-first real**, similar a una aplicación móvil moderna.
+
+La aplicación debe estar completamente en **español**.
+
+No quiero textos de interfaz en inglés.
+
+---
+
+# OBJETIVO GENERAL
+
+Quiero una aplicación que pueda abrir desde mi teléfono antes o durante el entrenamiento y utilizarla para llevar absolutamente todo el registro de mis entrenamientos.
+
+Debe permitirme:
+
+* Crear ejercicios.
+* Crear rutinas.
+* Agregar ejercicios a las rutinas.
+* Registrar series.
+* Registrar peso.
+* Registrar repeticiones.
+* Ver qué peso utilicé anteriormente.
+* Controlar el descanso entre series.
+* Guardar entrenamientos.
+* Consultar historial.
+* Ver progreso.
+* Configurar mis preferencias.
+
+La aplicación debe ser realmente funcional.
+
+NO quiero solamente un diseño o una maqueta.
+
+---
+
+# 1. NAVEGACIÓN PRINCIPAL
+
+Utilizar una navegación inferior optimizada para móvil.
+
+Las secciones principales deberían ser:
+
+**Inicio**
+**Rutinas**
+**Entrenar**
+**Historial**
+**Progreso**
+
+Configuración puede estar accesible desde Inicio o mediante un icono de perfil/configuración.
+
+La barra inferior debe permanecer cómoda para utilizar con el pulgar.
+
+Los iconos deben ser claros y acompañarse con texto.
+
+---
+
+# 2. PANTALLA INICIO
+
+Crear un dashboard principal.
+
+Debe mostrar:
+
+* Saludo.
+* Entrenamiento del día.
+* Botón grande "Comenzar entrenamiento".
+* Último entrenamiento.
+* Entrenamientos realizados esta semana.
+* Tiempo entrenado esta semana.
+* Resumen rápido del progreso.
+
+Ejemplo:
+
+"Hola"
+
+"¿Listo para entrenar?"
+
+[ COMENZAR ENTRENAMIENTO ]
+
+Último entrenamiento:
+Pecho + Tríceps
+
+52 minutos
+
+Esta semana:
+4 entrenamientos
+
+---
+
+# 3. CATÁLOGO DE EJERCICIOS
+
+Crear una sección llamada:
+
+**Ejercicios**
+
+Esta sección es MUY IMPORTANTE.
+
+Quiero poder administrar mis propios ejercicios.
+
+Debe existir un botón:
+
+**+ Añadir ejercicio**
+
+Al crear un ejercicio permitir:
+
+* Nombre del ejercicio.
+* Grupo muscular.
+* Equipamiento.
+* Descripción.
+* Notas.
+
+Ejemplo:
+
+Nombre:
+Curl de bíceps con mancuerna
+
+Grupo muscular:
+Bíceps
+
+Equipamiento:
+Mancuernas
+
+Descripción:
+Curl de bíceps alternado con mancuernas.
+
+---
+
+# 4. GRUPOS MUSCULARES
+
+Permitir seleccionar grupos musculares como:
+
+* Pecho
+* Espalda
+* Bíceps
+* Tríceps
+* Hombros
+* Piernas
+* Cuádriceps
+* Isquiotibiales
+* Glúteos
+* Gemelos
+* Abdomen
+* Antebrazos
+* Cardio
+* Otro
+
+El sistema debe permitir agregar ejercicios personalizados.
+
+NO limitar al usuario únicamente a ejercicios predefinidos.
+
+---
+
+# 5. EJERCICIOS PREDEFINIDOS
+
+La aplicación puede venir inicialmente con una lista de ejercicios comunes.
+
+Por ejemplo:
+
+Pecho:
+
+* Press banca
+* Press inclinado
+* Press declinado
+* Aperturas
+* Fondos
+
+Espalda:
+
+* Dominadas
+* Jalón al pecho
+* Remo con barra
+* Remo con mancuerna
+
+Bíceps:
+
+* Curl con barra
+* Curl con mancuerna
+* Curl martillo
+* Curl en polea
+
+Tríceps:
+
+* Extensión en polea
+* Press francés
+* Fondos
+* Extensión sobre cabeza
+
+Piernas:
+
+* Sentadilla
+* Prensa
+* Extensión de cuádriceps
+* Curl femoral
+* Peso muerto
+* Hip thrust
+
+Hombros:
+
+* Press militar
+* Elevaciones laterales
+* Elevaciones frontales
+* Pájaros
+
+Pero estos ejercicios deben poder editarse/eliminarse si corresponde.
+
+---
+
+# 6. BUSCAR EJERCICIOS
+
+En la sección de ejercicios debe existir búsqueda.
+
+Ejemplo:
+
+Buscar:
+
+"curl"
+
+Resultados:
+
+* Curl de bíceps con barra
+* Curl con mancuerna
+* Curl martillo
+* Curl en polea
+
+También permitir filtrar por grupo muscular.
+
+---
+
+# 7. RUTINAS
+
+Crear una sección:
+
+**Rutinas**
+
+Debe permitir:
+
+* Crear rutina.
+* Editar rutina.
+* Eliminar rutina.
+* Duplicar rutina.
+* Cambiar nombre.
+* Agregar ejercicios.
+* Eliminar ejercicios.
+* Reordenar ejercicios.
+
+Ejemplos:
+
+Rutina A — Pecho + Tríceps
+
+Rutina B — Espalda + Bíceps
+
+Rutina C — Piernas
+
+---
+
+# 8. CREAR UNA RUTINA
+
+Al crear una rutina:
+
+Nombre:
+
+"Pecho + Tríceps"
+
+Luego:
+
+[ + Añadir ejercicio ]
+
+Mostrar el catálogo de ejercicios.
+
+Seleccionar:
+
+Press banca
+
+Configurar:
+
+Series:
+4
+
+Repeticiones objetivo:
+8-10
+
+Descanso:
+90 segundos
+
+Luego agregar:
+
+Press inclinado
+
+Series:
+3
+
+Repeticiones:
+10
+
+Descanso:
+90 segundos
+
+Y así sucesivamente.
+
+---
+
+# 9. ORDEN DE EJERCICIOS
+
+Permitir cambiar el orden de los ejercicios mediante una interacción cómoda para móvil.
+
+Preferentemente utilizar drag & drop o controles de subir/bajar.
+
+Ejemplo:
+
+1. Press banca
+2. Press inclinado
+3. Aperturas
+4. Extensión tríceps
+
+---
+
+# 10. ENTRENAMIENTO ACTIVO
+
+Crear una pantalla especial:
+
+**Entrenamiento**
+
+Esta debe ser la pantalla más optimizada de toda la aplicación.
+
+Cuando comienzo una rutina, mostrar los ejercicios uno por uno.
+
+Ejemplo:
+
+PECHO
+
+Press banca
+
+Último entrenamiento:
+
+60 kg × 10
+60 kg × 9
+55 kg × 10
+
+---
+
+Serie 1
+
+Peso:
+[ 60 kg ]
+
+Repeticiones:
+[ 10 ]
+
+[ ✓ COMPLETAR SERIE ]
+
+---
+
+Serie 2
+
+Peso:
+[ 60 kg ]
+
+Repeticiones:
+[  ]
+
+[ COMPLETAR SERIE ]
+
+---
+
+# 11. REGISTRO DE SERIES
+
+Cada serie debe guardar:
+
+* Número de serie.
+* Peso.
+* Repeticiones.
+* Hora.
+* Ejercicio.
+* Descanso.
+
+Permitir editar una serie después de registrarla.
+
+También permitir eliminar una serie si se registró por error.
+
+---
+
+# 12. RECORDAR EL PESO ANTERIOR
+
+Cuando vuelva a hacer un ejercicio, mostrar automáticamente el último registro.
+
+Ejemplo:
+
+Curl de bíceps
+
+Último entrenamiento:
+
+30 kg × 10
+30 kg × 9
+27,5 kg × 10
+
+Esto debe ayudarme a saber qué peso utilizar.
+
+Si nunca hice el ejercicio:
+
+"No hay registros anteriores."
+
+---
+
+# 13. CRONÓMETRO DE DESCANSO
+
+Esta funcionalidad es FUNDAMENTAL.
+
+Cuando complete una serie:
+
+[ ✓ COMPLETAR SERIE ]
+
+debe comenzar automáticamente el descanso configurado.
+
+Ejemplo:
+
+DESCANSO
+
+01:30
+
+[ PAUSAR ]
+
+[ +15 SEG ]
+
+[ SALTAR ]
+
+Cuando llegue a cero:
+
+* Sonido.
+* Vibración si el dispositivo lo permite.
+* Indicador visual.
+* Aviso de que el descanso terminó.
+
+---
+
+# 14. CONFIGURACIÓN DEL DESCANSO
+
+Cada ejercicio debe poder tener su propio tiempo de descanso.
+
+Opciones rápidas:
+
+30 segundos
+45 segundos
+60 segundos
+90 segundos
+120 segundos
+180 segundos
+
+También permitir un tiempo personalizado.
+
+---
+
+# 15. CRONÓMETRO CORRECTO
+
+El cronómetro debe funcionar utilizando tiempo real/timestamps.
+
+NO utilizar simplemente un contador que disminuye mediante un intervalo y asumir que siempre es exacto.
+
+Debe continuar correctamente si:
+
+* Cambio de pantalla.
+* Bloqueo/desbloqueo del teléfono.
+* El navegador pasa temporalmente a segundo plano.
+
+---
+
+# 16. TIEMPO TOTAL DE ENTRENAMIENTO
+
+Cuando comienzo un entrenamiento:
+
+Iniciar un contador de duración.
+
+Ejemplo:
+
+00:42:18
+
+Mostrarlo durante el entrenamiento.
+
+Al finalizar:
+
+Duración:
+42 minutos
+
+Guardar la duración.
+
+---
+
+# 17. FINALIZAR ENTRENAMIENTO
+
+Crear botón:
+
+**Finalizar entrenamiento**
+
+Antes de finalizar, pedir confirmación si todavía existen ejercicios/series pendientes.
+
+Una vez terminado:
+
+Mostrar resumen.
+
+Ejemplo:
+
+ENTRENAMIENTO COMPLETADO
+
+Pecho + Tríceps
+
+Duración:
+52 minutos
+
+Ejercicios:
+6
+
+Series:
+18
+
+Volumen:
+XXXX kg
+
+[ VER ENTRENAMIENTO ]
+
+---
+
+# 18. HISTORIAL
+
+Crear una sección:
+
+**Historial**
+
+Mostrar los entrenamientos anteriores.
+
+Ejemplo:
+
+26 AGO
+
+Pecho + Tríceps
+52 min
+18 series
+
+24 AGO
+
+Espalda + Bíceps
+48 min
+16 series
+
+Al seleccionar uno:
+
+Mostrar:
+
+* Rutina.
+* Fecha.
+* Duración.
+* Ejercicios.
+* Series.
+* Peso.
+* Repeticiones.
+* Descansos.
+* Notas.
+
+---
+
+# 19. PROGRESO
+
+Crear una sección:
+
+**Progreso**
+
+Mostrar:
+
+* Entrenamientos totales.
+* Entrenamientos esta semana.
+* Tiempo total entrenado.
+* Volumen total.
+* Mejores pesos.
+* Récords personales.
+
+Mostrar gráficos sencillos y claros.
+
+Por ejemplo:
+
+Press banca
+
+Semana 1:
+50 kg
+
+Semana 2:
+55 kg
+
+Semana 3:
+60 kg
+
+Semana 4:
+62,5 kg
+
+---
+
+# 20. RÉCORDS PERSONALES
+
+Detectar automáticamente mejores marcas.
+
+Por ejemplo:
+
+Press banca
+
+Mejor peso:
+80 kg
+
+Mejor serie:
+80 kg × 5
+
+Mejor volumen:
+400 kg
+
+Cuando se consiga un nuevo récord, mostrar una pequeña celebración visual.
+
+Ejemplo:
+
+🔥 ¡Nuevo récord!
+
+Press banca:
+80 kg
+
+---
+
+# 21. NOTAS
+
+Permitir agregar notas a ejercicios y entrenamientos.
+
+Ejemplo:
+
+"Me costó bastante la última serie."
+
+"Subir peso la próxima vez."
+
+---
+
+# 22. CONFIGURACIÓN
+
+Crear una pantalla de configuración.
+
+Opciones:
+
+* Nombre.
+* Unidad de peso.
+* Descanso predeterminado.
+* Sonido del temporizador.
+* Vibración.
+* Tema claro/oscuro.
+
+Por defecto:
+
+Kilogramos.
+
+---
+
+# 23. DISEÑO MOBILE
+
+Quiero una interfaz completamente orientada a teléfono.
+
+NO quiero:
+
+* Tablas enormes.
+* Menús pequeños.
+* Botones diminutos.
+* Elementos difíciles de tocar.
+* Scroll horizontal.
+* Interfaces pensadas para mouse.
+
+Quiero:
+
+* Botones grandes.
+* Tarjetas.
+* Listas verticales.
+* Inputs grandes.
+* Navegación inferior.
+* Tipografía clara.
+* Mucho espacio táctil.
+
+---
+
+# 24. DISEÑO DURANTE ENTRENAMIENTO
+
+Durante el entrenamiento la aplicación debe ser especialmente sencilla.
+
+Tengo que poder mirar el teléfono rápidamente y entender:
+
+"Qué ejercicio estoy haciendo"
+
+"Qué serie estoy haciendo"
+
+"Cuánto peso utilicé"
+
+"Cuántas repeticiones hice"
+
+"Cuánto descanso me queda"
+
+No sobrecargar esta pantalla con información secundaria.
+
+---
+
+# 25. TECLADO DEL TELÉFONO
+
+Para:
+
+Peso
+Repeticiones
+Tiempo
+
+utilizar inputs numéricos adecuados para que el teléfono muestre el teclado numérico.
+
+Permitir valores decimales.
+
+Ejemplo:
+
+20
+22.5
+25
+27.5
+30
+
+---
+
+# 26. DISEÑO VISUAL
+
+Quiero un estilo:
+
+* Moderno.
+* Deportivo.
+* Premium.
+* Minimalista.
+* Oscuro como opción principal.
+* Alto contraste.
+* Animaciones sutiles.
+
+No quiero que parezca una plantilla genérica.
+
+Debe sentirse como una aplicación real de fitness.
+
+---
+
+# 27. PWA
+
+Preparar la aplicación para poder instalarse en el teléfono como una PWA.
+
+Configurar:
+
+* Manifest.
+* Nombre: Gym Tracker.
+* Icono.
+* Tema.
+* Pantalla completa cuando sea posible.
+
+La idea es poder:
+
+Abrir desde el navegador
+
+→ "Agregar a pantalla de inicio"
+
+→ Abrir Gym Tracker como una aplicación.
+
+---
+
+# 28. PERSISTENCIA INICIAL
+
+Para esta primera versión, implementar persistencia funcional de los datos.
+
+La aplicación debe conservar:
+
+* Ejercicios.
+* Rutinas.
+* Entrenamientos.
+* Series.
+* Pesos.
+* Repeticiones.
+* Historial.
+* Configuración.
+
+IMPORTANTE:
+
+La arquitectura debe permitir posteriormente migrar fácilmente a una base de datos y autenticación.
+
+No crear una arquitectura que haga imposible esa migración.
+
+Si se utiliza almacenamiento local para esta primera versión, crear una capa de persistencia separada de la interfaz para poder sustituirla posteriormente.
+
+---
+
+# 29. ARQUITECTURA
+
+Antes de comenzar a programar:
+
+1. Analiza los requisitos.
+2. Define la arquitectura.
+3. Define los modelos de datos.
+4. Define la navegación.
+5. Define cómo funcionará el entrenamiento.
+6. Define cómo funcionará el cronómetro.
+7. Después comienza la implementación.
+
+Separar correctamente:
+
+* Componentes.
+* Estado.
+* Lógica.
+* Persistencia.
+* Cronómetro.
+* Modelos.
+* UI.
+
+NO crear un único archivo gigante.
+
+---
+
+# 30. MODELOS
+
+Preparar entidades similares a:
+
+Usuario
+Ejercicio
+Rutina
+EjercicioDeRutina
+Entrenamiento
+EjercicioDeEntrenamiento
+Serie
+Configuración
+
+No es necesario implementar autenticación todavía.
+
+Pero dejar la arquitectura preparada para agregarla posteriormente.
+
+---
+
+# 31. DATOS DE EJEMPLO
+
+Al iniciar por primera vez, incluir algunos ejercicios de ejemplo para poder probar la aplicación.
+
+Pero diferenciar claramente:
+
+* Ejercicios predefinidos.
+* Ejercicios creados por el usuario.
+
+El usuario debe poder crear sus propios ejercicios.
+
+---
+
+# 32. EXPERIENCIA GENERAL
+
+El flujo principal debe ser:
+
+Abrir aplicación
+↓
+Inicio
+↓
+Comenzar entrenamiento
+↓
+Elegir rutina
+↓
+Primer ejercicio
+↓
+Registrar peso y repeticiones
+↓
+Completar serie
+↓
+Comienza automáticamente el descanso
+↓
+Termina descanso
+↓
+Siguiente serie
+↓
+Siguiente ejercicio
+↓
+Finalizar entrenamiento
+↓
+Ver resumen
+↓
+Guardar en historial
+
+Debe ser rápido y sin pasos innecesarios.
+
+---
+
+# 33. CALIDAD
+
+No quiero únicamente que "se vea bien".
+
+Quiero funcionalidad real.
+
+Probar:
+
+* Crear ejercicio.
+* Editar ejercicio.
+* Eliminar ejercicio.
+* Buscar ejercicio.
+* Crear rutina.
+* Agregar ejercicio a rutina.
+* Reordenar ejercicios.
+* Iniciar entrenamiento.
+* Registrar serie.
+* Editar serie.
+* Iniciar descanso.
+* Pausar descanso.
+* Agregar 15 segundos.
+* Saltar descanso.
+* Finalizar entrenamiento.
+* Ver historial.
+* Ver progreso.
+* Recargar la aplicación.
+* Comprobar que los datos continúen existiendo.
+
+---
+
+# 34. NO HACER
+
+No implementar todavía:
+
+* Login.
+* Registro de usuarios.
+* Base de datos remota.
+* Suscripciones.
+* Pagos.
+* Funciones sociales.
+* Publicidad.
+
+Quiero primero una aplicación personal completamente funcional.
+
+Posteriormente trabajaré la migración a base de datos y autenticación con OpenCode.
+
+---
+
+# 35. REGLA PRINCIPAL
+
+Quiero que priorices en este orden:
+
+1. Funcionalidad.
+2. Experiencia móvil.
+3. Facilidad de uso durante el entrenamiento.
+4. Persistencia.
+5. Diseño visual.
+6. Arquitectura limpia.
+
+No sacrifiques funcionalidad por estética.
+
+---
+
+# RESULTADO ESPERADO
+
+Al terminar quiero poder instalar/abrir Gym Tracker desde mi teléfono y utilizarla realmente en el gimnasio.
+
+Quiero poder:
+
+Crear mis ejercicios
+↓
+Crear mis rutinas
+↓
+Entrenar
+↓
+Registrar pesos y repeticiones
+↓
+Controlar descansos
+↓
+Guardar el entrenamiento
+↓
+Consultar mi historial
+↓
+Ver mi progreso
+
+La aplicación debe estar completamente en español y diseñada específicamente para teléfonos.
+
+Antes de comenzar a escribir código, inspecciona los requisitos anteriores y crea una breve explicación de la arquitectura que vas a utilizar.
+
+Después implementa la aplicación completa y funcional.
+
+Al finalizar, realiza pruebas de las funcionalidades principales y corrige los errores encontrados.
