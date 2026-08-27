@@ -77,7 +77,7 @@ function ExerciseEditor({ exercise, onClose }: { exercise: Exercise | null; onCl
     <Field label="Notas" value={notes} onChangeText={setNotes} placeholder="Consejos personales (opcional)" multiline />
     <View style={styles.editorActions}><Button label="Guardar ejercicio" icon="check" onPress={() => save()} /><Button label="Cancelar" variant="ghost" onPress={onClose} /></View>
     <Modal visible={showDuplicateWarning} transparent animationType="fade" onRequestClose={() => setShowDuplicateWarning(false)}>
-      <View style={styles.modalBackdrop}><View style={[styles.duplicateModal, { backgroundColor: colors.card }]}><Text style={[styles.duplicateTitle, { color: colors.foreground }]}>¿Ejercicio duplicado?</Text><Text style={[styles.duplicateText, { color: colors.mutedForeground }]}>Ya existe un ejercicio con un nombre similar. ¿Querés crearlo igual?</Text><View style={styles.duplicateActions}><Button label="Crear igualmente" onPress={() => { setShowDuplicateWarning(false); save(true); }} /><Button label="Cancelar" variant="ghost" onPress={() => setShowDuplicateWarning(false)} /></View></View>
+      <View style={styles.modalBackdrop}><View style={[styles.duplicateModal, { backgroundColor: colors.card }]}><Text style={[styles.duplicateTitle, { color: colors.foreground }]}>¿Ejercicio duplicado?</Text><Text style={[styles.duplicateText, { color: colors.mutedForeground }]}>Ya existe un ejercicio con un nombre similar. ¿Querés crearlo igual?</Text><View style={styles.duplicateActions}><Button label="Crear igualmente" onPress={() => { setShowDuplicateWarning(false); save(true); }} /><Button label="Cancelar" variant="ghost" onPress={() => setShowDuplicateWarning(false)} /></View></View></View>
     </Modal>
   </KeyboardAwareScrollViewCompat>;
 }
