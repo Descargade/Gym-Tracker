@@ -6,7 +6,7 @@ import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
 import { useGym, notifyRestFinished } from '@/context/GymContext';
 import { Button, Field, IconButton, Screen } from '@/components/GymUI';
-import { WorkoutSet } from '@/types/models';
+import { Workout, WorkoutSet } from '@/types/models';
 
 const clock = (seconds: number) => `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
 const duration = (seconds: number) => `${Math.floor(seconds / 60)} min`;
@@ -16,6 +16,7 @@ export default function TrainScreen() {
   const { routineId } = useLocalSearchParams<{ routineId?: string }>();
   const { activeWorkout, routines, startWorkout } = useGym();
   const startedRef = useRef(false);
+  const [finishedWorkout, setFinishedWorkout] = useState<Workout | null>(null);
   useEffect(() => {
     if (routineId && !activeWorkout && !startedRef.current) {
       startedRef.current = true;
@@ -23,16 +24,45 @@ export default function TrainScreen() {
     }
   }, [routineId, activeWorkout, startWorkout]);
 
+  if (finishedWorkout) {
+    const totalSets = finishedWorkout.exercises.reduce((sum, item) => sum + item.sets.length, 0);
+    return (
+      <Screen scroll={false}>
+        <View style={styles.summaryScreen}>
+          <View style={[styles.summaryIconWrap, { backgroundColor: colors.secondary }]}>
+            <Feather name="check-circle" size={48} color={colors.success} />
+          </View>
+          <Text style={[styles.summaryOverline, { color: colors.primary }]}>ENTRENAMIENTO COMPLETADO</Text>
+          <Text style={[styles.summaryRoutine, { color: colors.foreground }]}>{finishedWorkout.routineName}</Text>
+          <View style={styles.summaryStats}>
+            <View style={[styles.summaryStat, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <Text style={[styles.summaryStatValue, { color: colors.foreground }]}>{duration(finishedWorkout.durationSeconds)}</Text>
+              <Text style={[styles.summaryStatLabel, { color: colors.mutedForeground }]}>Duración</Text>
+            </View>
+            <View style={[styles.summaryStat, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <Text style={[styles.summaryStatValue, { color: colors.foreground }]}>{totalSets}</Text>
+              <Text style={[styles.summaryStatLabel, { color: colors.mutedForeground }]}>Series</Text>
+            </View>
+          </View>
+          <View style={styles.summaryActions}>
+            <Button label="Ver historial" icon="clock" onPress={() => { setFinishedWorkout(null); router.replace('/(tabs)/history'); }} />
+            <Button label="Volver al inicio" variant="ghost" icon="home" onPress={() => { setFinishedWorkout(null); router.replace('/(tabs)'); }} />
+          </View>
+        </View>
+      </Screen>
+    );
+  }
+
   if (!activeWorkout) {
     return <Screen scroll={false}><View style={styles.loadingScreen}><Feather name="activity" size={34} color={colors.primary} /><Text style={[styles.loadingTitle, { color: colors.foreground }]}>Preparando tu entrenamiento</Text><Text style={[styles.loadingText, { color: colors.mutedForeground }]}>Elige una rutina para comenzar.</Text>{routines.map((routine) => <Pressable key={routine.id} onPress={() => startWorkout(routine.id)} style={[styles.routineChoice, { backgroundColor: colors.card, borderColor: colors.border }]}><Text style={[styles.routineChoiceName, { color: colors.foreground }]}>{routine.name}</Text><Text style={[styles.routineChoiceMeta, { color: colors.mutedForeground }]}>{routine.exercises.length} ejercicios</Text><Feather name="chevron-right" size={19} color={colors.primary} /></Pressable>)}<Button label="Volver" variant="ghost" icon="arrow-left" onPress={() => router.back()} /></View></Screen>;
   }
-  return <TrainingSession />;
+  return <TrainingSession onFinished={(workout) => setFinishedWorkout(workout)} />;
 }
 
-function TrainingSession() {
+function TrainingSession({ onFinished }: { onFinished: (workout: Workout) => void }) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { activeWorkout, routines, exercises, settings, getPreviousSets, getBestWeight, completeSet, editSet, deleteSet, setCurrentExercise, startRest, pauseRest, addRestSeconds, skipRest, finishWorkout } = useGym();
+  const { activeWorkout, routines, exercises, settings, getPreviousSets, getBestWeight, completeSet, editSet, deleteSet, setCurrentExercise, startRest, pauseRest, addRestSeconds, skipRest, finishWorkout, cancelWorkout } = useGym();
   const [now, setNow] = useState(Date.now());
   const [editingSet, setEditingSet] = useState<{ exerciseId: string; set: WorkoutSet } | null>(null);
   const workout = activeWorkout!;
@@ -80,15 +110,15 @@ function TrainingSession() {
   const finish = () => {
     const pending = plannedSets > totalSets;
     const action = () => {
-      const summary = `${workout.routineName}\n${duration(elapsed)} · ${totalSets} series`;
-      finishWorkout();
-      Alert.alert('Entrenamiento guardado', summary, [{ text: 'Ver historial', onPress: () => router.replace('/history') }]);
+      skipRest();
+      const finished = finishWorkout();
+      if (finished) onFinished(finished);
     };
-    if (pending) Alert.alert('Hay ejercicios pendientes', 'Todavía quedan series sin registrar. ¿Finalizar de todos modos?', [{ text: 'Continuar entrenando', style: 'cancel' }, { text: 'Finalizar', style: 'destructive', onPress: action }]); else action();
+    if (pending) Alert.alert('¿Querés finalizar el entrenamiento?', 'Todavía quedan series sin registrar.', [{ text: 'Cancelar', style: 'cancel' }, { text: 'Finalizar', style: 'destructive', onPress: action }]); else action();
   };
 
   return <View style={[styles.root, { backgroundColor: colors.background }]}>
-    <View style={[styles.topBar, { paddingTop: insets.top + 8, borderBottomColor: colors.border }]}><IconButton icon="x" label="Salir" onPress={() => Alert.alert('Salir del entrenamiento', 'Tu sesión actual se perderá.', [{ text: 'Seguir', style: 'cancel' }, { text: 'Salir', style: 'destructive', onPress: () => { skipRest(); router.back(); } }])} /><View style={styles.topCopy}><Text style={[styles.topTitle, { color: colors.foreground }]}>{workout.routineName}</Text><Text style={[styles.topMeta, { color: colors.mutedForeground }]}>{clock(elapsed)} · {totalSets}/{plannedSets} series</Text></View><Pressable onPress={finish} style={({ pressed }) => [styles.finishBtn, { opacity: pressed ? 0.7 : 1 }]}><Text style={[styles.finishText, { color: colors.primary }]}>Finalizar</Text></Pressable></View>
+    <View style={[styles.topBar, { paddingTop: insets.top + 8, borderBottomColor: colors.border }]}><IconButton icon="x" label="Salir" onPress={() => Alert.alert('¿Querés salir del entrenamiento?', 'El entrenamiento actual todavía no terminó.', [{ text: 'Continuar entrenando', style: 'cancel' }, { text: 'Salir', style: 'destructive', onPress: () => { skipRest(); cancelWorkout(); router.back(); } }])} /><View style={styles.topCopy}><Text style={[styles.topTitle, { color: colors.foreground }]}>{workout.routineName}</Text><Text style={[styles.topMeta, { color: colors.mutedForeground }]}>{clock(elapsed)} · {totalSets}/{plannedSets} series</Text></View><Pressable onPress={finish} style={({ pressed }) => [styles.finishBtn, { opacity: pressed ? 0.7 : 1 }]}><Text style={[styles.finishText, { color: colors.primary }]}>Finalizar</Text></Pressable></View>
     {workout.restTimer ? <RestPanel remaining={restRemaining} paused={workout.restTimer.isPaused} onPause={pauseRest} onAdd={() => addRestSeconds(15)} onSkip={skipRest} /> : <Screen><View style={styles.exerciseHeader}><Text style={[styles.exerciseGroup, { color: colors.primary }]}>{currentExercise.group.toUpperCase()}</Text><Text style={[styles.exerciseName, { color: colors.foreground }]}>{currentExercise.name}</Text><Text style={[styles.exerciseMeta, { color: colors.mutedForeground }]}>{workout.currentExerciseIndex + 1} de {workout.exercises.length} · {routineItem.sets} series objetivo · {routineItem.restSeconds}s descanso</Text></View>
       <View style={[styles.previousCard, { backgroundColor: colors.card, borderColor: colors.border }]}><View style={styles.previousHeading}><Feather name="rotate-ccw" size={15} color={colors.primary} /><Text style={[styles.previousTitle, { color: colors.foreground }]}>Último entrenamiento</Text></View>{previousSets.length ? <View style={styles.previousSets}>{previousSets.map((set) => <Text style={[styles.previousSet, { color: colors.mutedForeground }]} key={set.id}>{set.weight} {settings.weightUnit} × {set.reps}</Text>)}</View> : <Text style={[styles.previousSet, { color: colors.mutedForeground }]}>No hay registros anteriores.</Text>}</View>
       <View style={styles.inputRow}><View style={styles.inputHalf}><Field label={`Peso (${settings.weightUnit})`} value={weight} onChangeText={setWeight} placeholder="0" keyboardType="decimal-pad" /></View><View style={styles.inputHalf}><Field label="Repeticiones" value={reps} onChangeText={setReps} placeholder={routineItem.targetReps} keyboardType="numeric" /></View></View>
@@ -161,4 +191,13 @@ const styles = StyleSheet.create({
   setModal: { borderTopLeftRadius: 26, borderTopRightRadius: 26, padding: 22, gap: 8, paddingBottom: 36 },
   modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
   modalTitle: { fontSize: 20, fontWeight: '800' },
+  summaryScreen: { flex: 1, padding: 24, alignItems: 'center', justifyContent: 'center', gap: 12 },
+  summaryIconWrap: { width: 90, height: 90, borderRadius: 28, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  summaryOverline: { fontSize: 12, fontWeight: '800', letterSpacing: 1.5 },
+  summaryRoutine: { fontSize: 26, fontWeight: '800', marginTop: 4, letterSpacing: -0.5 },
+  summaryStats: { flexDirection: 'row', gap: 10, marginTop: 18, width: '100%' },
+  summaryStat: { flex: 1, borderRadius: 17, borderWidth: 1, padding: 16, alignItems: 'center' },
+  summaryStatValue: { fontSize: 20, fontWeight: '800' },
+  summaryStatLabel: { fontSize: 12, marginTop: 4 },
+  summaryActions: { width: '100%', gap: 9, marginTop: 24 },
 });

@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { Alert, Vibration } from 'react-native';
+import { Alert, Appearance, Vibration } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { initialState } from '@/data/seed';
 import { loadGymState, saveGymState } from '@/services/storage';
@@ -38,6 +38,7 @@ interface GymContextValue extends GymState {
   addRestSeconds: (seconds: number) => void;
   skipRest: () => void;
   finishWorkout: () => Workout | null;
+  cancelWorkout: () => void;
   updateSettings: (settings: Partial<Settings>) => void;
   getPreviousSets: (exerciseId: string) => WorkoutSet[];
   getBestWeight: (exerciseId: string) => number;
@@ -53,7 +54,10 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     loadGymState()
       .then((stored) => {
-        if (stored) setState(stored);
+        if (stored) {
+          setState(stored);
+          Appearance.setColorScheme(stored.settings.theme);
+        }
       })
       .finally(() => setHydrated(true));
   }, []);
@@ -244,6 +248,10 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
     return finished;
   }, [update]);
 
+  const cancelWorkout = useCallback(() => {
+    update((current) => ({ ...current, activeWorkout: null }));
+  }, [update]);
+
   const updateSettings = useCallback((settings: Partial<Settings>) => {
     update((current) => ({ ...current, settings: { ...current.settings, ...settings } }));
   }, [update]);
@@ -280,10 +288,11 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
     addRestSeconds,
     skipRest,
     finishWorkout,
+    cancelWorkout,
     updateSettings,
     getPreviousSets,
     getBestWeight,
-  }), [state, hydrated, addExercise, updateExercise, deleteExercise, archiveExercise, checkDuplicateExercise, addRoutine, updateRoutine, deleteRoutine, duplicateRoutine, moveRoutineExercise, startWorkout, completeSet, editSet, deleteSet, setCurrentExercise, startRest, pauseRest, addRestSeconds, skipRest, finishWorkout, updateSettings, getPreviousSets, getBestWeight]);
+  }), [state, hydrated, addExercise, updateExercise, deleteExercise, archiveExercise, checkDuplicateExercise, addRoutine, updateRoutine, deleteRoutine, duplicateRoutine, moveRoutineExercise, startWorkout, completeSet, editSet, deleteSet, setCurrentExercise, startRest, pauseRest, addRestSeconds, skipRest, finishWorkout, cancelWorkout, updateSettings, getPreviousSets, getBestWeight]);
 
   return <GymContext.Provider value={value}>{children}</GymContext.Provider>;
 }
