@@ -21,6 +21,7 @@ export const starterExercises: Exercise[] = [
   description,
   notes,
   isCustom: false,
+  isActive: true,
 }));
 
 const starterRoutines: Routine[] = [

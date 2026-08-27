@@ -32,8 +32,8 @@ const styles = StyleSheet.create({
   recordMeta: { fontSize: 11, marginTop: 3 },
   recordBest: { fontSize: 17, fontWeight: '800' },
   unit: { fontSize: 11, fontWeight: '500' },
-  chart: { height: 155, borderBottomWidth: 1, borderLeftWidth: 1, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-around', paddingHorizontal: 13, paddingBottom: 1 },
-  barWrap: { alignItems: 'center', justifyContent: 'flex-end', height: 140, gap: 7 },
-  bar: { width: 24, borderRadius: 8 },
+  chart: { height: 155, borderBottomWidth: 1, borderLeftWidth: 1, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-around', paddingHorizontal: 8, paddingBottom: 1 },
+  barWrap: { alignItems: 'center', justifyContent: 'flex-end', height: 140, gap: 7, flex: 1 },
+  bar: { width: '70%', maxWidth: 28, borderRadius: 8 },
   barLabel: { fontSize: 10 },
 });

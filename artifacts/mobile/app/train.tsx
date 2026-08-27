@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
@@ -30,6 +31,7 @@ export default function TrainScreen() {
 
 function TrainingSession() {
   const colors = useColors();
+  const insets = useSafeAreaInsets();
   const { activeWorkout, routines, exercises, settings, getPreviousSets, getBestWeight, completeSet, editSet, deleteSet, setCurrentExercise, startRest, pauseRest, addRestSeconds, skipRest, finishWorkout } = useGym();
   const [now, setNow] = useState(Date.now());
   const [editingSet, setEditingSet] = useState<{ exerciseId: string; set: WorkoutSet } | null>(null);
@@ -86,7 +88,7 @@ function TrainingSession() {
   };
 
   return <View style={[styles.root, { backgroundColor: colors.background }]}>
-    <View style={[styles.topBar, { borderBottomColor: colors.border }]}><IconButton icon="x" label="Salir" onPress={() => Alert.alert('Salir del entrenamiento', 'Tu sesión actual se perderá.', [{ text: 'Seguir', style: 'cancel' }, { text: 'Salir', style: 'destructive', onPress: () => { skipRest(); router.back(); } }])} /><View style={styles.topCopy}><Text style={[styles.topTitle, { color: colors.foreground }]}>{workout.routineName}</Text><Text style={[styles.topMeta, { color: colors.mutedForeground }]}>{clock(elapsed)} · {totalSets}/{plannedSets} series</Text></View><Pressable onPress={finish}><Text style={[styles.finishText, { color: colors.primary }]}>Finalizar</Text></Pressable></View>
+    <View style={[styles.topBar, { paddingTop: insets.top + 8, borderBottomColor: colors.border }]}><IconButton icon="x" label="Salir" onPress={() => Alert.alert('Salir del entrenamiento', 'Tu sesión actual se perderá.', [{ text: 'Seguir', style: 'cancel' }, { text: 'Salir', style: 'destructive', onPress: () => { skipRest(); router.back(); } }])} /><View style={styles.topCopy}><Text style={[styles.topTitle, { color: colors.foreground }]}>{workout.routineName}</Text><Text style={[styles.topMeta, { color: colors.mutedForeground }]}>{clock(elapsed)} · {totalSets}/{plannedSets} series</Text></View><Pressable onPress={finish} style={({ pressed }) => [styles.finishBtn, { opacity: pressed ? 0.7 : 1 }]}><Text style={[styles.finishText, { color: colors.primary }]}>Finalizar</Text></Pressable></View>
     {workout.restTimer ? <RestPanel remaining={restRemaining} paused={workout.restTimer.isPaused} onPause={pauseRest} onAdd={() => addRestSeconds(15)} onSkip={skipRest} /> : <Screen><View style={styles.exerciseHeader}><Text style={[styles.exerciseGroup, { color: colors.primary }]}>{currentExercise.group.toUpperCase()}</Text><Text style={[styles.exerciseName, { color: colors.foreground }]}>{currentExercise.name}</Text><Text style={[styles.exerciseMeta, { color: colors.mutedForeground }]}>{workout.currentExerciseIndex + 1} de {workout.exercises.length} · {routineItem.sets} series objetivo · {routineItem.restSeconds}s descanso</Text></View>
       <View style={[styles.previousCard, { backgroundColor: colors.card, borderColor: colors.border }]}><View style={styles.previousHeading}><Feather name="rotate-ccw" size={15} color={colors.primary} /><Text style={[styles.previousTitle, { color: colors.foreground }]}>Último entrenamiento</Text></View>{previousSets.length ? <View style={styles.previousSets}>{previousSets.map((set) => <Text style={[styles.previousSet, { color: colors.mutedForeground }]} key={set.id}>{set.weight} {settings.weightUnit} × {set.reps}</Text>)}</View> : <Text style={[styles.previousSet, { color: colors.mutedForeground }]}>No hay registros anteriores.</Text>}</View>
       <View style={styles.inputRow}><View style={styles.inputHalf}><Field label={`Peso (${settings.weightUnit})`} value={weight} onChangeText={setWeight} placeholder="0" keyboardType="decimal-pad" /></View><View style={styles.inputHalf}><Field label="Repeticiones" value={reps} onChangeText={setReps} placeholder={routineItem.targetReps} keyboardType="numeric" /></View></View>
@@ -101,7 +103,8 @@ function TrainingSession() {
 
 function RestPanel({ remaining, paused, onPause, onAdd, onSkip }: { remaining: number; paused: boolean; onPause: () => void; onAdd: () => void; onSkip: () => void }) {
   const colors = useColors();
-  return <View style={styles.restPanel}><View style={[styles.restOrb, { borderColor: colors.accent, backgroundColor: colors.card }]}><Text style={[styles.restOverline, { color: colors.mutedForeground }]}>DESCANSO</Text><Text style={[styles.restTime, { color: colors.foreground }]}>{clock(remaining)}</Text><Text style={[styles.restStatus, { color: colors.primary }]}>{paused ? 'En pausa' : 'Recupera y respira'}</Text></View><View style={styles.restActions}><Button label={paused ? 'Continuar' : 'Pausar'} icon={paused ? 'play' : 'pause'} onPress={onPause} variant="secondary" /><Button label="+15 seg" icon="plus" onPress={onAdd} variant="ghost" /><Button label="Saltar descanso" icon="skip-forward" onPress={onSkip} variant="ghost" /></View></View>;
+  const insets = useSafeAreaInsets();
+  return <View style={[styles.restPanel, { paddingTop: insets.top + 20 }]}><View style={[styles.restOrb, { borderColor: colors.accent, backgroundColor: colors.card }]}><Text style={[styles.restOverline, { color: colors.mutedForeground }]}>DESCANSO</Text><Text style={[styles.restTime, { color: colors.foreground }]}>{clock(remaining)}</Text><Text style={[styles.restStatus, { color: colors.primary }]}>{paused ? 'En pausa' : 'Recupera y respira'}</Text></View><View style={styles.restActions}><View style={styles.restButtonRow}><Pressable onPress={onPause} style={({ pressed }) => [styles.restButton, { backgroundColor: colors.secondary, opacity: pressed ? 0.7 : 1 }]}><Feather name={paused ? 'play' : 'pause'} size={22} color={colors.foreground} /><Text style={[styles.restButtonText, { color: colors.foreground }]}>{paused ? 'Continuar' : 'Pausar'}</Text></Pressable><Pressable onPress={onAdd} style={({ pressed }) => [styles.restButton, { backgroundColor: colors.secondary, opacity: pressed ? 0.7 : 1 }]}><Feather name="plus" size={22} color={colors.foreground} /><Text style={[styles.restButtonText, { color: colors.foreground }]}>+15 seg</Text></Pressable></View><Pressable onPress={onSkip} style={({ pressed }) => [styles.restSkipButton, { borderColor: colors.border, opacity: pressed ? 0.7 : 1 }]}><Feather name="skip-forward" size={18} color={colors.primary} /><Text style={[styles.restSkipText, { color: colors.primary }]}>Saltar descanso</Text></Pressable></View></View>;
 }
 
 function SetEditor({ set, onClose, onSave, onDelete }: { exerciseId: string; set: WorkoutSet; onClose: () => void; onSave: (weight: number, reps: number) => void; onDelete: () => void }) {
@@ -113,20 +116,21 @@ function SetEditor({ set, onClose, onSave, onDelete }: { exerciseId: string; set
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  topBar: { paddingTop: 54, paddingHorizontal: 18, paddingBottom: 13, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1 },
+  topBar: { paddingHorizontal: 18, paddingBottom: 13, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1 },
   topCopy: { flex: 1, marginLeft: 12 },
   topTitle: { fontSize: 15, fontWeight: '700' },
   topMeta: { fontSize: 11, marginTop: 3 },
-  finishText: { fontSize: 13, fontWeight: '800' },
+  finishBtn: { paddingVertical: 10, paddingHorizontal: 14, minHeight: 44, justifyContent: 'center', alignItems: 'center' },
+  finishText: { fontSize: 14, fontWeight: '800' },
   loadingScreen: { flex: 1, padding: 22, alignItems: 'center', justifyContent: 'center', gap: 12 },
   loadingTitle: { fontSize: 21, fontWeight: '800', marginTop: 8 },
   loadingText: { fontSize: 13, marginBottom: 12 },
-  routineChoice: { width: '100%', borderWidth: 1, borderRadius: 17, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center' },
+  routineChoice: { width: '100%', borderWidth: 1, borderRadius: 17, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center', minHeight: 56 },
   routineChoiceName: { flex: 1, fontSize: 15, fontWeight: '700' },
   routineChoiceMeta: { fontSize: 12, marginRight: 10 },
   exerciseHeader: { marginTop: 4, marginBottom: 20 },
   exerciseGroup: { fontSize: 11, letterSpacing: 1.3, fontWeight: '800' },
-  exerciseName: { fontSize: 30, fontWeight: '800', marginTop: 8, letterSpacing: -0.6 },
+  exerciseName: { fontSize: 28, fontWeight: '800', marginTop: 8, letterSpacing: -0.6 },
   exerciseMeta: { fontSize: 12, marginTop: 7 },
   previousCard: { borderRadius: 18, borderWidth: 1, padding: 15, marginBottom: 18 },
   previousHeading: { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 11 },
@@ -143,11 +147,16 @@ const styles = StyleSheet.create({
   setValue: { fontSize: 13, fontWeight: '600', flex: 1 },
   exerciseNav: { flexDirection: 'row', gap: 9, marginTop: 24 },
   restPanel: { flex: 1, paddingHorizontal: 24, justifyContent: 'center', alignItems: 'center' },
-  restOrb: { width: 245, height: 245, borderRadius: 123, borderWidth: 5, alignItems: 'center', justifyContent: 'center' },
+  restOrb: { width: 190, height: 190, borderRadius: 95, borderWidth: 4, alignItems: 'center', justifyContent: 'center' },
   restOverline: { fontSize: 11, letterSpacing: 1.5, fontWeight: '800' },
-  restTime: { fontSize: 48, fontWeight: '800', marginTop: 10, letterSpacing: -1 },
-  restStatus: { fontSize: 13, fontWeight: '600', marginTop: 9 },
-  restActions: { width: '100%', gap: 10, marginTop: 43 },
+  restTime: { fontSize: 44, fontWeight: '800', marginTop: 8, letterSpacing: -1 },
+  restStatus: { fontSize: 13, fontWeight: '600', marginTop: 7 },
+  restActions: { width: '100%', gap: 12, marginTop: 32 },
+  restButtonRow: { flexDirection: 'row', gap: 10 },
+  restButton: { flex: 1, minHeight: 52, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  restButtonText: { fontSize: 14, fontWeight: '700' },
+  restSkipButton: { minHeight: 48, borderRadius: 14, borderWidth: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  restSkipText: { fontSize: 13, fontWeight: '700' },
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.62)', justifyContent: 'flex-end' },
   setModal: { borderTopLeftRadius: 26, borderTopRightRadius: 26, padding: 22, gap: 8, paddingBottom: 36 },
   modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },

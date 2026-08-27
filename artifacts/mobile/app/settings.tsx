@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontWeight: '800', marginBottom: 13 },
   label: { fontSize: 12, fontWeight: '600', marginBottom: 9 },
   options: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  option: { paddingHorizontal: 15, paddingVertical: 11, borderRadius: 13 },
+  option: { paddingHorizontal: 18, paddingVertical: 14, borderRadius: 14, minHeight: 46, justifyContent: 'center' },
   preferenceRow: { minHeight: 68, borderBottomWidth: 1, flexDirection: 'row', alignItems: 'center', gap: 11 },
   preferenceIcon: { width: 35, height: 35, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   preferenceLabel: { flex: 1, fontSize: 14, fontWeight: '600' },

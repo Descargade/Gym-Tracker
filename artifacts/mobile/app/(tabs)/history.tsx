@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
 import { useGym } from '@/context/GymContext';
@@ -17,8 +18,9 @@ export default function HistoryScreen() {
 
 function WorkoutDetail({ workout, onClose }: { workout: Workout; onClose: () => void }) {
   const colors = useColors();
+  const insets = useSafeAreaInsets();
   const { exercises, settings } = useGym();
-  return <Screen><View style={styles.detailHeader}><View><Text style={[styles.detailTitle, { color: colors.foreground }]}>{workout.routineName}</Text><Text style={[styles.detailDate, { color: colors.mutedForeground }]}>{new Intl.DateTimeFormat('es-AR', { dateStyle: 'full' }).format(new Date(workout.startedAt))}</Text></View><IconButton icon="x" label="Cerrar" onPress={onClose} /></View><View style={styles.detailStats}><DetailStat label="Duración" value={`${Math.floor(workout.durationSeconds / 60)} min`} /><DetailStat label="Series" value={`${workout.exercises.reduce((sum, item) => sum + item.sets.length, 0)}`} /><DetailStat label="Volumen" value={`${Math.round(workout.exercises.flatMap((item) => item.sets).reduce((sum, set) => sum + set.weight * set.reps, 0))} ${settings.weightUnit}`} /></View>{workout.exercises.map((item) => { const exercise = exercises.find((candidate) => candidate.id === item.exerciseId); return <View key={item.exerciseId} style={[styles.detailExercise, { backgroundColor: colors.card, borderColor: colors.border }]}><Text style={[styles.detailExerciseName, { color: colors.foreground }]}>{exercise?.name}</Text>{item.sets.map((set) => <Text key={set.id} style={[styles.detailSet, { color: colors.mutedForeground }]}>Serie {set.setNumber} · {set.weight} {settings.weightUnit} × {set.reps}</Text>)}</View>; })}</Screen>;
+  return <View style={[styles.detailRoot, { backgroundColor: colors.background }]}><ScrollView contentContainerStyle={[styles.detailScroll, { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 24 }]} showsVerticalScrollIndicator={false}><View style={styles.detailHeader}><View style={{ flex: 1 }}><Text style={[styles.detailTitle, { color: colors.foreground }]}>{workout.routineName}</Text><Text style={[styles.detailDate, { color: colors.mutedForeground }]}>{new Intl.DateTimeFormat('es-AR', { dateStyle: 'full' }).format(new Date(workout.startedAt))}</Text></View><IconButton icon="x" label="Cerrar" onPress={onClose} /></View><View style={styles.detailStats}><DetailStat label="Duración" value={`${Math.floor(workout.durationSeconds / 60)} min`} /><DetailStat label="Series" value={`${workout.exercises.reduce((sum, item) => sum + item.sets.length, 0)}`} /><DetailStat label="Volumen" value={`${Math.round(workout.exercises.flatMap((item) => item.sets).reduce((sum, set) => sum + set.weight * set.reps, 0))} ${settings.weightUnit}`} /></View>{workout.exercises.map((item) => { const exercise = exercises.find((candidate) => candidate.id === item.exerciseId); return <View key={item.exerciseId} style={[styles.detailExercise, { backgroundColor: colors.card, borderColor: colors.border }]}><Text style={[styles.detailExerciseName, { color: colors.foreground }]}>{exercise?.name}</Text>{item.sets.map((set) => <Text key={set.id} style={[styles.detailSet, { color: colors.mutedForeground }]}>Serie {set.setNumber} · {set.weight} {settings.weightUnit} × {set.reps}</Text>)}</View>; })}</ScrollView></View>;
 }
 
 function DetailStat({ label, value }: { label: string; value: string }) {
@@ -33,6 +35,8 @@ const styles = StyleSheet.create({
   copy: { flex: 1 },
   name: { fontSize: 15, fontWeight: '700' },
   meta: { fontSize: 12, marginTop: 5 },
+  detailRoot: { flex: 1 },
+  detailScroll: { paddingHorizontal: 20 },
   detailHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 23 },
   detailTitle: { fontSize: 26, fontWeight: '800' },
   detailDate: { fontSize: 12, marginTop: 5 },

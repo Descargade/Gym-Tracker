@@ -1,5 +1,6 @@
 import React from 'react';
 import { Platform, StyleSheet, useColorScheme, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 import { Feather } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
@@ -33,6 +34,8 @@ function ClassicTabLayout() {
   const isDark = colorScheme === 'dark';
   const isIOS = Platform.OS === 'ios';
   const isWeb = Platform.OS === 'web';
+  const insets = useSafeAreaInsets();
+  const tabBarHeight = 56 + Math.max(insets.bottom, 8);
 
   return (
     <Tabs
@@ -45,8 +48,9 @@ function ClassicTabLayout() {
           backgroundColor: isIOS ? 'transparent' : colors.background,
           borderTopWidth: isWeb ? 1 : 0,
           borderTopColor: colors.border,
+          height: tabBarHeight,
+          paddingBottom: Math.max(insets.bottom, 8),
           elevation: 0,
-          ...(isWeb ? { height: 84 } : {}),
         },
         tabBarBackground: () =>
           isIOS ? (

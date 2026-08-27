@@ -25,6 +25,7 @@ export interface Exercise {
   description: string;
   notes: string;
   isCustom: boolean;
+  isActive: boolean;
 }
 
 export interface RoutineExercise {

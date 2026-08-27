@@ -21,6 +21,8 @@ interface GymContextValue extends GymState {
   addExercise: (exercise: Omit<Exercise, 'id'>) => void;
   updateExercise: (id: string, exercise: Omit<Exercise, 'id'>) => void;
   deleteExercise: (id: string) => void;
+  archiveExercise: (id: string) => void;
+  checkDuplicateExercise: (name: string) => Exercise | undefined;
   addRoutine: (name: string, exercises: RoutineExercise[]) => void;
   updateRoutine: (id: string, name: string, exercises: RoutineExercise[]) => void;
   deleteRoutine: (id: string) => void;
@@ -79,6 +81,18 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
       routines: current.routines.map((routine) => ({ ...routine, exercises: routine.exercises.filter((item) => item.exerciseId !== id) })),
     }));
   }, [update]);
+
+  const archiveExercise = useCallback((id: string) => {
+    update((current) => ({
+      ...current,
+      exercises: current.exercises.map((item) => item.id === id ? { ...item, isActive: false } : item),
+    }));
+  }, [update]);
+
+  const checkDuplicateExercise = useCallback((name: string) => {
+    const normalized = name.trim().toLowerCase();
+    return state.exercises.find((item) => item.name.trim().toLowerCase() === normalized);
+  }, [state.exercises]);
 
   const addRoutine = useCallback((name: string, exercises: RoutineExercise[]) => {
     update((current) => ({ ...current, routines: [...current.routines, { id: makeId('routine'), name, exercises, updatedAt: Date.now() }] }));
@@ -249,6 +263,8 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
     addExercise,
     updateExercise,
     deleteExercise,
+    archiveExercise,
+    checkDuplicateExercise,
     addRoutine,
     updateRoutine,
     deleteRoutine,
@@ -267,7 +283,7 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
     updateSettings,
     getPreviousSets,
     getBestWeight,
-  }), [state, hydrated, addExercise, updateExercise, deleteExercise, addRoutine, updateRoutine, deleteRoutine, duplicateRoutine, moveRoutineExercise, startWorkout, completeSet, editSet, deleteSet, setCurrentExercise, startRest, pauseRest, addRestSeconds, skipRest, finishWorkout, updateSettings, getPreviousSets, getBestWeight]);
+  }), [state, hydrated, addExercise, updateExercise, deleteExercise, archiveExercise, checkDuplicateExercise, addRoutine, updateRoutine, deleteRoutine, duplicateRoutine, moveRoutineExercise, startWorkout, completeSet, editSet, deleteSet, setCurrentExercise, startRest, pauseRest, addRestSeconds, skipRest, finishWorkout, updateSettings, getPreviousSets, getBestWeight]);
 
   return <GymContext.Provider value={value}>{children}</GymContext.Provider>;
 }

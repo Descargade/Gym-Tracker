@@ -1,12 +1,15 @@
 import React from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
 
 export function Screen({ children, scroll = true }: { children: React.ReactNode; scroll?: boolean }) {
   const colors = useColors();
+  const insets = useSafeAreaInsets();
   const Container = scroll ? ScrollView : View;
-  return <Container style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={scroll ? styles.content : undefined} showsVerticalScrollIndicator={false}>{children}</Container>;
+  const bottomPad = Math.max(insets.bottom, 24) + 90;
+  return <Container style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]} contentContainerStyle={scroll ? [styles.content, { paddingBottom: bottomPad }] : undefined} showsVerticalScrollIndicator={false}>{children}</Container>;
 }
 
 export function Header({ title, subtitle, action, onAction }: { title: string; subtitle?: string; action?: string; onAction?: () => void }) {
@@ -59,7 +62,7 @@ export function LoadingState() {
 
 export const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { paddingHorizontal: 20, paddingTop: 22, paddingBottom: 118 },
+  content: { paddingHorizontal: 20, paddingTop: 12 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 },
   headerCopy: { flex: 1 },
   title: { fontSize: 30, fontWeight: '700', letterSpacing: -0.8 },
