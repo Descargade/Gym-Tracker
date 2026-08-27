@@ -3,11 +3,12 @@
   "outputDirectory": "artifacts/mobile/dist",
   "framework": null,
   "installCommand": "corepack enable && corepack prepare pnpm@10.33.4 --activate && pnpm install --no-frozen-lockfile",
+  "cleanUrls": true,
   "rewrites": [
-    { "source": "/history", "destination": "/(tabs)/history.html" },
-    { "source": "/progress", "destination": "/(tabs)/progress.html" },
-    { "source": "/routines", "destination": "/(tabs)/routines.html" },
-    { "source": "/exercises", "destination": "/(tabs)/exercises.html" },
+    { "source": "/history", "destination": "/history.html" },
+    { "source": "/progress", "destination": "/progress.html" },
+    { "source": "/routines", "destination": "/routines.html" },
+    { "source": "/exercises", "destination": "/exercises.html" },
     { "source": "/settings", "destination": "/settings.html" },
     { "source": "/train", "destination": "/train.html" }
   ]
