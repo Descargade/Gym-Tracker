@@ -87,6 +87,7 @@ export interface ActiveWorkout {
 }
 
 export interface Settings {
+  userId: string;
   name: string;
   weightUnit: WeightUnit;
   defaultRestSeconds: number;

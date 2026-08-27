@@ -1,5 +1,7 @@
 import { Exercise, GymState, MuscleGroup, Routine } from '@/types/models';
 
+const generateUserId = () => 'USR-' + Math.random().toString(36).slice(2, 8);
+
 export const starterExercises: Exercise[] = [
   ['Press banca', 'Pecho', 'Barra', 'Empuje horizontal con barra.', 'Mantener escápulas retraídas.'],
   ['Press inclinado', 'Pecho', 'Barra', 'Press para enfatizar la parte superior del pecho.', ''],
@@ -62,6 +64,7 @@ export const initialState: GymState = {
   routines: starterRoutines,
   workouts: [],
   settings: {
+    userId: generateUserId(),
     name: 'Atleta',
     weightUnit: 'kg',
     defaultRestSeconds: 90,
