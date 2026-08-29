@@ -15,6 +15,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { GymProvider, useGym } from '@/context/GymContext';
 import { StatusBar } from 'expo-status-bar';
+import { InstallBanner } from '@/components/InstallBanner';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -58,6 +59,7 @@ export default function RootLayout() {
             <GestureHandlerRootView style={{ flex: 1 }}>
               <KeyboardProvider>
                 <ThemeStatusBar />
+                <InstallBanner />
                 <RootLayoutNav />
               </KeyboardProvider>
             </GestureHandlerRootView>

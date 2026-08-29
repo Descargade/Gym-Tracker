@@ -1,36 +1,21 @@
-const CACHE_NAME = 'gym-tracker-v1';
+const CACHE_NAME = 'gym-tracker-v2';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
   '/history',
-  '/history.html',
   '/progress',
-  '/progress.html',
   '/routines',
-  '/routines.html',
   '/exercises',
-  '/exercises.html',
   '/settings',
-  '/settings.html',
   '/train',
-  '/train.html',
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(PRECACHE_ASSETS).catch(() => {
-        return cache.addAll([
-          '/',
-          '/index.html',
-          '/history.html',
-          '/progress.html',
-          '/routines.html',
-          '/exercises.html',
-          '/settings.html',
-          '/train.html',
-        ]);
-      });
+      return Promise.allSettled(
+        PRECACHE_ASSETS.map((url) => cache.add(url).catch(() => null))
+      );
     })
   );
   self.skipWaiting();
@@ -49,6 +34,7 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  if (event.request.url.includes('chrome-extension')) return;
 
   event.respondWith(
     caches.match(event.request).then((cached) => {
