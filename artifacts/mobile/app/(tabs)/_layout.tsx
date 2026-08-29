@@ -24,6 +24,7 @@ function NativeTabLayout() {
       <NativeTabs.Trigger name="train"><Icon sf={{ default: 'figure.strengthtraining.traditional', selected: 'figure.strengthtraining.traditional' }} /><Label>Entrenar</Label></NativeTabs.Trigger>
       <NativeTabs.Trigger name="history"><Icon sf={{ default: 'clock', selected: 'clock.fill' }} /><Label>Historial</Label></NativeTabs.Trigger>
       <NativeTabs.Trigger name="progress"><Icon sf={{ default: 'chart.bar', selected: 'chart.bar.fill' }} /><Label>Progreso</Label></NativeTabs.Trigger>
+      <NativeTabs.Trigger name="exercises"><Icon sf={{ default: 'dumbbell', selected: 'dumbbell.fill' }} /><Label>Ejercicios</Label></NativeTabs.Trigger>
     </NativeTabs>
   );
 }

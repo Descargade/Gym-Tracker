@@ -40,7 +40,7 @@ export default function ExercisesScreen() {
         }
       }}><Text style={[styles.deleteText, { color: colors.destructive }]}>{isUsedInWorkouts(exercise.id) ? 'Archivar' : 'Eliminar'}</Text></Pressable> : null}</View>
     </View>)}
-    <Modal visible={editing !== null} animationType="slide" onRequestClose={() => setEditing(null)}><ExerciseEditor exercise={editing} onClose={() => setEditing(null)} /></Modal>
+    <Modal visible={editing !== null} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setEditing(null)}><ExerciseEditor exercise={editing} onClose={() => setEditing(null)} /></Modal>
     <Modal visible={deleteTarget !== null} transparent animationType="fade" onRequestClose={() => setDeleteTarget(null)}>
       <View style={styles.modalBackdrop}><View style={[styles.confirmModal, { backgroundColor: colors.card }]}>
         <Text style={[styles.confirmTitle, { color: colors.foreground }]}>Eliminar ejercicio</Text>

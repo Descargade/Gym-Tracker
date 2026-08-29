@@ -8,14 +8,34 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+function isIOS(): boolean {
+  if (Platform.OS !== 'web') return false;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
 export function InstallBanner() {
   const colors = useColors();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showBanner, setShowBanner] = useState(false);
+  const [showIOSInstructions, setShowIOSInstructions] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
     if (Platform.OS !== 'web') return;
+
+    const ios = isIOS();
+
+    if (ios) {
+      if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true) {
+        setIsInstalled(true);
+        return;
+      }
+      const dismissed = sessionStorage.getItem('pwa-install-dismissed');
+      if (!dismissed) {
+        setShowBanner(true);
+      }
+      return;
+    }
 
     const handler = (e: Event) => {
       e.preventDefault();
@@ -53,6 +73,7 @@ export function InstallBanner() {
 
   const handleDismiss = () => {
     setShowBanner(false);
+    setShowIOSInstructions(false);
     sessionStorage.setItem('pwa-install-dismissed', '1');
   };
 
@@ -62,10 +83,51 @@ export function InstallBanner() {
     }
   }, [showBanner]);
 
-  if (isInstalled || !showBanner || Platform.OS !== 'web') return null;
+  if (isInstalled || Platform.OS !== 'web') return null;
+
+  if (showIOSInstructions) {
+    return (
+      <Modal transparent animationType="fade" visible onRequestClose={handleDismiss}>
+        <View style={styles.overlay}>
+          <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={[styles.iconWrap, { backgroundColor: colors.primary + '20' }]}>
+              <Feather name="smartphone" size={28} color={colors.primary} />
+            </View>
+            <Text style={[styles.title, { color: colors.foreground }]}>Instalar en iPhone</Text>
+            <Text style={[styles.desc, { color: colors.mutedForeground }]}>Sigue estos pasos para agregar Gym Tracker a tu pantalla de inicio:</Text>
+            <View style={styles.steps}>
+              <View style={[styles.step, { backgroundColor: colors.secondary }]}>
+                <View style={[styles.stepNum, { backgroundColor: colors.primary }]}>
+                  <Text style={[styles.stepNumText, { color: colors.primaryForeground }]}>1</Text>
+                </View>
+                <Text style={[styles.stepText, { color: colors.foreground }]}>Toca el boton de <Text style={{ fontWeight: '800' }}>Compartir</Text> (cuadro con flecha arriba) en la barra de Safari</Text>
+              </View>
+              <View style={[styles.step, { backgroundColor: colors.secondary }]}>
+                <View style={[styles.stepNum, { backgroundColor: colors.primary }]}>
+                  <Text style={[styles.stepNumText, { color: colors.primaryForeground }]}>2</Text>
+                </View>
+                <Text style={[styles.stepText, { color: colors.foreground }]}>Selecciona <Text style={{ fontWeight: '800' }}>"Agregar a pantalla de inicio"</Text></Text>
+              </View>
+              <View style={[styles.step, { backgroundColor: colors.secondary }]}>
+                <View style={[styles.stepNum, { backgroundColor: colors.primary }]}>
+                  <Text style={[styles.stepNumText, { color: colors.primaryForeground }]}>3</Text>
+                </View>
+                <Text style={[styles.stepText, { color: colors.foreground }]}>Toca <Text style={{ fontWeight: '800' }}>"Agregar"</Text> en la esquina superior derecha</Text>
+              </View>
+            </View>
+            <Pressable onPress={handleDismiss} style={[styles.btn, { backgroundColor: colors.primary, width: '100%' }]}>
+              <Text style={[styles.btnText, { color: colors.primaryForeground }]}>Entendido</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+    );
+  }
+
+  if (!showBanner) return null;
 
   return (
-    <Modal transparent animationType="fade" visible={showBanner} onRequestClose={handleDismiss}>
+    <Modal transparent animationType="fade" visible onRequestClose={handleDismiss}>
       <View style={styles.overlay}>
         <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <View style={[styles.iconWrap, { backgroundColor: colors.primary + '20' }]}>
@@ -73,15 +135,23 @@ export function InstallBanner() {
           </View>
           <Text style={[styles.title, { color: colors.foreground }]}>Instalar Gym Tracker</Text>
           <Text style={[styles.desc, { color: colors.mutedForeground }]}>
-            Agrega la app a tu pantalla de inicio para acceso rapido y uso sin conexion.
+            {isIOS()
+              ? 'Agrega la app a tu pantalla de inicio para acceso rapido.'
+              : 'Agrega la app a tu pantalla de inicio para acceso rapido y uso sin conexion.'}
           </Text>
           <View style={styles.actions}>
             <Pressable onPress={handleDismiss} style={[styles.btn, { backgroundColor: colors.secondary }]}>
               <Text style={[styles.btnText, { color: colors.secondaryForeground }]}>Ahora no</Text>
             </Pressable>
-            <Pressable onPress={handleInstall} style={[styles.btn, { backgroundColor: colors.primary }]}>
-              <Text style={[styles.btnText, { color: colors.primaryForeground }]}>Instalar</Text>
-            </Pressable>
+            {isIOS() ? (
+              <Pressable onPress={() => { setShowBanner(false); setShowIOSInstructions(true); }} style={[styles.btn, { backgroundColor: colors.primary }]}>
+                <Text style={[styles.btnText, { color: colors.primaryForeground }]}>Ver pasos</Text>
+              </Pressable>
+            ) : (
+              <Pressable onPress={handleInstall} style={[styles.btn, { backgroundColor: colors.primary }]}>
+                <Text style={[styles.btnText, { color: colors.primaryForeground }]}>Instalar</Text>
+              </Pressable>
+            )}
           </View>
         </View>
       </View>
@@ -140,5 +210,33 @@ const styles = StyleSheet.create({
   btnText: {
     fontSize: 15,
     fontWeight: '700',
+  },
+  steps: {
+    width: '100%',
+    gap: 10,
+    marginBottom: 20,
+  },
+  step: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderRadius: 12,
+    padding: 12,
+  },
+  stepNum: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepNumText: {
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  stepText: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 18,
   },
 });
