@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Alert, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
@@ -13,7 +13,11 @@ export default function RoutinesScreen() {
   const { routines, exercises, addRoutine, updateRoutine, deleteRoutine, duplicateRoutine, moveRoutineExercise } = useGym();
   const [editing, setEditing] = useState<string | null>(null);
   const [editorVisible, setEditorVisible] = useState(false);
+  const [menuRoutine, setMenuRoutine] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const current = routines.find((routine) => routine.id === editing);
+  const menuTarget = routines.find((routine) => routine.id === menuRoutine);
+  const deleteTarget = routines.find((routine) => routine.id === deleteConfirm);
 
   const openEditor = (id?: string) => { setEditing(id ?? null); setEditorVisible(true); };
   const closeEditor = () => { setEditing(null); setEditorVisible(false); };
@@ -21,11 +25,30 @@ export default function RoutinesScreen() {
   return <Screen>
     <Header title="Rutinas" subtitle={`${routines.length} rutinas listas para usar`} action="Añadir rutina" onAction={() => openEditor()} />
     {routines.length === 0 ? <EmptyState icon="list" title="Aún no tienes rutinas" description="Crea una rutina con tus ejercicios favoritos y empieza a entrenar." /> : routines.map((routine) => <View key={routine.id} style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-      <View style={styles.cardTop}><View style={[styles.routineIcon, { backgroundColor: colors.secondary }]}><Feather name="layers" size={20} color={colors.primary} /></View><View style={styles.cardCopy}><Text style={[styles.routineName, { color: colors.foreground }]}>{routine.name}</Text><Text style={[styles.routineMeta, { color: colors.mutedForeground }]}>{routine.exercises.length} ejercicios · {routine.exercises.reduce((sum, item) => sum + item.sets, 0)} series</Text></View><IconButton icon="more-horizontal" label="Más opciones" onPress={() => Alert.alert(routine.name, '¿Qué deseas hacer?', [{ text: 'Editar', onPress: () => openEditor(routine.id) }, { text: 'Duplicar', onPress: () => duplicateRoutine(routine.id) }, { text: 'Eliminar', style: 'destructive', onPress: () => deleteRoutine(routine.id) }, { text: 'Cancelar', style: 'cancel' }])} /></View>
+      <View style={styles.cardTop}><View style={[styles.routineIcon, { backgroundColor: colors.secondary }]}><Feather name="layers" size={20} color={colors.primary} /></View><View style={styles.cardCopy}><Text style={[styles.routineName, { color: colors.foreground }]}>{routine.name}</Text><Text style={[styles.routineMeta, { color: colors.mutedForeground }]}>{routine.exercises.length} ejercicios · {routine.exercises.reduce((sum, item) => sum + item.sets, 0)} series</Text></View><IconButton icon="more-horizontal" label="Más opciones" onPress={() => setMenuRoutine(routine.id)} /></View>
       <View style={styles.exercisePreview}>{routine.exercises.slice(0, 3).map((item, index) => { const exercise = exercises.find((candidate) => candidate.id === item.exerciseId); return <View style={styles.previewLine} key={item.id}><Text style={[styles.previewNumber, { color: colors.primary }]}>{String(index + 1).padStart(2, '0')}</Text><Text style={[styles.previewName, { color: colors.foreground }]}>{exercise?.name ?? 'Ejercicio eliminado'}</Text><Text style={[styles.previewSets, { color: colors.mutedForeground }]}>{item.sets} × {item.targetReps}</Text></View>; })}</View>
       <Button label="Comenzar" icon="play" onPress={() => router.push({ pathname: '/train', params: { routineId: routine.id } })} />
     </View>)}
     <Modal visible={editorVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={closeEditor}><RoutineEditor routineId={editing} onClose={closeEditor} /></Modal>
+    <Modal visible={menuRoutine !== null} transparent animationType="fade" onRequestClose={() => setMenuRoutine(null)}>
+      <View style={styles.modalBackdrop}><View style={[styles.menuModal, { backgroundColor: colors.card }]}>
+        <Text style={[styles.menuTitle, { color: colors.foreground }]}>{menuTarget?.name}</Text>
+        <Pressable onPress={() => { setMenuRoutine(null); openEditor(menuRoutine!); }} style={[styles.menuOption, { backgroundColor: colors.secondary }]}><Feather name="edit-2" size={18} color={colors.foreground} /><Text style={[styles.menuOptionText, { color: colors.foreground }]}>Editar</Text></Pressable>
+        <Pressable onPress={() => { setMenuRoutine(null); duplicateRoutine(menuRoutine!); }} style={[styles.menuOption, { backgroundColor: colors.secondary }]}><Feather name="copy" size={18} color={colors.foreground} /><Text style={[styles.menuOptionText, { color: colors.foreground }]}>Duplicar</Text></Pressable>
+        <Pressable onPress={() => { setMenuRoutine(null); setDeleteConfirm(menuRoutine!); }} style={[styles.menuOption, { backgroundColor: colors.destructive + '18' }]}><Feather name="trash-2" size={18} color={colors.destructive} /><Text style={[styles.menuOptionText, { color: colors.destructive }]}>Eliminar</Text></Pressable>
+        <Pressable onPress={() => setMenuRoutine(null)} style={[styles.menuOption, { backgroundColor: colors.secondary }]}><Text style={[styles.menuOptionText, { color: colors.mutedForeground, textAlign: 'center', width: '100%' }]}>Cancelar</Text></Pressable>
+      </View></View>
+    </Modal>
+    <Modal visible={deleteConfirm !== null} transparent animationType="fade" onRequestClose={() => setDeleteConfirm(null)}>
+      <View style={styles.modalBackdrop}><View style={[styles.menuModal, { backgroundColor: colors.card }]}>
+        <Text style={[styles.menuTitle, { color: colors.foreground }]}>Eliminar rutina</Text>
+        <Text style={[styles.menuDesc, { color: colors.mutedForeground }]}>¿Seguro que querés eliminar "{deleteTarget?.name}"? Esta acción no se puede deshacer.</Text>
+        <View style={styles.menuActions}>
+          <Button label="Cancelar" variant="ghost" onPress={() => setDeleteConfirm(null)} />
+          <Button label="Eliminar" variant="danger" onPress={() => { deleteRoutine(deleteConfirm!); setDeleteConfirm(null); }} />
+        </View>
+      </View></View>
+    </Modal>
   </Screen>;
 }
 
@@ -90,4 +113,11 @@ const styles = StyleSheet.create({
   catalogName: { fontSize: 14, fontWeight: '600' },
   catalogMeta: { fontSize: 11, marginTop: 4 },
   editorActions: { gap: 10, marginTop: 19 },
+  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 24 },
+  menuModal: { borderRadius: 20, padding: 24, width: '100%', maxWidth: 360 },
+  menuTitle: { fontSize: 18, fontWeight: '800', marginBottom: 6 },
+  menuDesc: { fontSize: 14, lineHeight: 21, marginBottom: 20 },
+  menuOption: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 14, padding: 15, marginBottom: 8 },
+  menuOptionText: { fontSize: 15, fontWeight: '600' },
+  menuActions: { flexDirection: 'row', gap: 10, marginTop: 4 },
 });

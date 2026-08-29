@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Alert, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
@@ -18,6 +18,8 @@ export default function ExercisesScreen() {
   const [query, setQuery] = useState('');
   const [group, setGroup] = useState<FilterGroup>('Todos');
   const [editing, setEditing] = useState<Exercise | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Exercise | null>(null);
+  const [archiveTarget, setArchiveTarget] = useState<Exercise | null>(null);
   const activeExercises = useMemo(() => exercises.filter((e) => e.isActive), [exercises]);
   const filtered = useMemo(() => activeExercises.filter((exercise) => exercise.name.toLowerCase().includes(query.toLowerCase()) && (group === 'Todos' || exercise.group === group)), [activeExercises, query, group]);
   const isUsedInWorkouts = (id: string) => workouts.some((w) => w.exercises.some((e) => e.exerciseId === id));
@@ -32,13 +34,33 @@ export default function ExercisesScreen() {
       {exercise.description ? <Text style={[styles.description, { color: colors.mutedForeground }]}>{exercise.description}</Text> : null}
       <View style={styles.badgeRow}><Text style={[styles.badge, { color: exercise.isCustom ? colors.primary : colors.mutedForeground, backgroundColor: exercise.isCustom ? colors.secondary : colors.muted }]}>{exercise.isCustom ? 'Personalizado' : 'Predefinido'}</Text>{exercise.isCustom ? <Pressable onPress={() => {
         if (isUsedInWorkouts(exercise.id)) {
-          Alert.alert('Archivar ejercicio', 'Este ejercicio se usó en entrenamientos anteriores. Se archivará para que no aparezca en nuevas rutinas, pero se mantendrá en el historial.', [{ text: 'Cancelar', style: 'cancel' }, { text: 'Archivar', onPress: () => archiveExercise(exercise.id) }]);
+          setArchiveTarget(exercise);
         } else {
-          Alert.alert('Eliminar ejercicio', '¿Seguro que querés eliminar este ejercicio?', [{ text: 'Cancelar', style: 'cancel' }, { text: 'Eliminar', style: 'destructive', onPress: () => deleteExercise(exercise.id) }]);
+          setDeleteTarget(exercise);
         }
       }}><Text style={[styles.deleteText, { color: colors.destructive }]}>{isUsedInWorkouts(exercise.id) ? 'Archivar' : 'Eliminar'}</Text></Pressable> : null}</View>
     </View>)}
     <Modal visible={editing !== null} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setEditing(null)}><ExerciseEditor exercise={editing} onClose={() => setEditing(null)} /></Modal>
+    <Modal visible={deleteTarget !== null} transparent animationType="fade" onRequestClose={() => setDeleteTarget(null)}>
+      <View style={styles.modalBackdrop}><View style={[styles.confirmModal, { backgroundColor: colors.card }]}>
+        <Text style={[styles.confirmTitle, { color: colors.foreground }]}>Eliminar ejercicio</Text>
+        <Text style={[styles.confirmDesc, { color: colors.mutedForeground }]}>¿Seguro que querés eliminar "{deleteTarget?.name}"? Esta acción no se puede deshacer.</Text>
+        <View style={styles.confirmActions}>
+          <Button label="Cancelar" variant="ghost" onPress={() => setDeleteTarget(null)} />
+          <Button label="Eliminar" variant="danger" onPress={() => { deleteExercise(deleteTarget!.id); setDeleteTarget(null); }} />
+        </View>
+      </View></View>
+    </Modal>
+    <Modal visible={archiveTarget !== null} transparent animationType="fade" onRequestClose={() => setArchiveTarget(null)}>
+      <View style={styles.modalBackdrop}><View style={[styles.confirmModal, { backgroundColor: colors.card }]}>
+        <Text style={[styles.confirmTitle, { color: colors.foreground }]}>Archivar ejercicio</Text>
+        <Text style={[styles.confirmDesc, { color: colors.mutedForeground }]}>Este ejercicio se usó en entrenamientos anteriores. Se archivará para que no aparezca en nuevas rutinas, pero se mantendrá en el historial.</Text>
+        <View style={styles.confirmActions}>
+          <Button label="Cancelar" variant="ghost" onPress={() => setArchiveTarget(null)} />
+          <Button label="Archivar" onPress={() => { archiveExercise(archiveTarget!.id); setArchiveTarget(null); }} />
+        </View>
+      </View></View>
+    </Modal>
   </Screen>;
 }
 
@@ -52,10 +74,11 @@ function ExerciseEditor({ exercise, onClose }: { exercise: Exercise | null; onCl
   const [description, setDescription] = useState(exercise?.description ?? '');
   const [notes, setNotes] = useState(exercise?.notes ?? '');
   const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
+  const [showNameError, setShowNameError] = useState(false);
   const isNew = !exercise?.id;
 
   const save = (force = false) => {
-    if (!name.trim()) return Alert.alert('Falta el nombre', 'Escribí un nombre para el ejercicio.');
+    if (!name.trim()) return setShowNameError(true);
     if (!force && isNew) {
       const existing = checkDuplicateExercise(name.trim());
       if (existing) {
@@ -78,6 +101,9 @@ function ExerciseEditor({ exercise, onClose }: { exercise: Exercise | null; onCl
     <View style={styles.editorActions}><Button label="Guardar ejercicio" icon="check" onPress={() => save()} /><Button label="Cancelar" variant="ghost" onPress={onClose} /></View>
     <Modal visible={showDuplicateWarning} transparent animationType="fade" onRequestClose={() => setShowDuplicateWarning(false)}>
       <View style={styles.modalBackdrop}><View style={[styles.duplicateModal, { backgroundColor: colors.card }]}><Text style={[styles.duplicateTitle, { color: colors.foreground }]}>¿Ejercicio duplicado?</Text><Text style={[styles.duplicateText, { color: colors.mutedForeground }]}>Ya existe un ejercicio con un nombre similar. ¿Querés crearlo igual?</Text><View style={styles.duplicateActions}><Button label="Crear igualmente" onPress={() => { setShowDuplicateWarning(false); save(true); }} /><Button label="Cancelar" variant="ghost" onPress={() => setShowDuplicateWarning(false)} /></View></View></View>
+    </Modal>
+    <Modal visible={showNameError} transparent animationType="fade" onRequestClose={() => setShowNameError(false)}>
+      <View style={styles.modalBackdrop}><View style={[styles.duplicateModal, { backgroundColor: colors.card }]}><Text style={[styles.duplicateTitle, { color: colors.foreground }]}>Falta el nombre</Text><Text style={[styles.duplicateText, { color: colors.mutedForeground }]}>Escribí un nombre para el ejercicio.</Text><Button label="Entendido" onPress={() => setShowNameError(false)} /></View></View>
     </Modal>
   </KeyboardAwareScrollViewCompat>;
 }
@@ -110,4 +136,8 @@ const styles = StyleSheet.create({
   duplicateTitle: { fontSize: 18, fontWeight: '800', marginBottom: 10 },
   duplicateText: { fontSize: 14, lineHeight: 21, marginBottom: 20 },
   duplicateActions: { gap: 10 },
+  confirmModal: { borderRadius: 20, padding: 24, width: '100%', maxWidth: 360 },
+  confirmTitle: { fontSize: 18, fontWeight: '800', marginBottom: 10 },
+  confirmDesc: { fontSize: 14, lineHeight: 21, marginBottom: 20 },
+  confirmActions: { flexDirection: 'row', gap: 10 },
 });
