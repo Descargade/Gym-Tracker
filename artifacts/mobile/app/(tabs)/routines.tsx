@@ -59,11 +59,13 @@ function RoutineEditor({ routineId, onClose }: { routineId: string | null; onClo
   const [name, setName] = useState(existing?.name ?? '');
   const [selected, setSelected] = useState<RoutineExercise[]>(existing?.exercises ?? []);
   const [query, setQuery] = useState('');
+  const [nameError, setNameError] = useState(false);
+  const [exercisesError, setExercisesError] = useState(false);
   const filtered = useMemo(() => exercises.filter((exercise) => exercise.isActive && exercise.name.toLowerCase().includes(query.toLowerCase())), [exercises, query]);
 
   const save = () => {
-    if (!name.trim()) return Alert.alert('Falta el nombre', 'Escribe un nombre para la rutina.');
-    if (!selected.length) return Alert.alert('Añade un ejercicio', 'Selecciona al menos un ejercicio.');
+    if (!name.trim()) return setNameError(true);
+    if (!selected.length) return setExercisesError(true);
     if (existing) updateRoutine(existing.id, name.trim(), selected); else addRoutine(name.trim(), selected);
     onClose();
   };
@@ -79,6 +81,20 @@ function RoutineEditor({ routineId, onClose }: { routineId: string | null; onClo
     <Field label="" value={query} onChangeText={setQuery} placeholder="Buscar ejercicio" />
     {filtered.map((exercise) => { const active = selected.some((item) => item.exerciseId === exercise.id); return <Pressable key={exercise.id} onPress={() => toggle(exercise.id)} style={[styles.catalogRow, { backgroundColor: active ? colors.secondary : colors.card, borderColor: active ? colors.primary : colors.border }]}><View><Text style={[styles.catalogName, { color: colors.foreground }]}>{exercise.name}</Text><Text style={[styles.catalogMeta, { color: colors.mutedForeground }]}>{exercise.group} · {exercise.equipment}</Text></View><Feather name={active ? 'check-circle' : 'plus-circle'} size={23} color={active ? colors.primary : colors.mutedForeground} /></Pressable>; })}
     <View style={styles.editorActions}><Button label={existing ? 'Guardar cambios' : 'Crear rutina'} onPress={save} icon="check" /><Button label="Cancelar" onPress={onClose} variant="ghost" /></View>
+    <Modal visible={nameError} transparent animationType="fade" onRequestClose={() => setNameError(false)}>
+      <View style={styles.modalBackdrop}><View style={[styles.menuModal, { backgroundColor: colors.card }]}>
+        <Text style={[styles.menuTitle, { color: colors.foreground }]}>Falta el nombre</Text>
+        <Text style={[styles.menuDesc, { color: colors.mutedForeground }]}>Escribí un nombre para la rutina.</Text>
+        <Button label="Entendido" onPress={() => setNameError(false)} />
+      </View></View>
+    </Modal>
+    <Modal visible={exercisesError} transparent animationType="fade" onRequestClose={() => setExercisesError(false)}>
+      <View style={styles.modalBackdrop}><View style={[styles.menuModal, { backgroundColor: colors.card }]}>
+        <Text style={[styles.menuTitle, { color: colors.foreground }]}>Añade un ejercicio</Text>
+        <Text style={[styles.menuDesc, { color: colors.mutedForeground }]}>Selecciona al menos un ejercicio del catálogo.</Text>
+        <Button label="Entendido" onPress={() => setExercisesError(false)} />
+      </View></View>
+    </Modal>
   </KeyboardAwareScrollViewCompat>;
 }
 
