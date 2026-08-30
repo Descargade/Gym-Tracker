@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
@@ -13,7 +13,9 @@ export default function HistoryScreen() {
   const colors = useColors();
   const { workouts } = useGym();
   const [selected, setSelected] = useState<Workout | null>(null);
-  return <Screen><Header title="Historial" subtitle="Tu recorrido, una sesión a la vez" />{workouts.length === 0 ? <EmptyState icon="clock" title="Todavía no hay entrenamientos" description="Cuando termines una sesión, aparecerá aquí con todos sus detalles." /> : workouts.map((workout) => { const sets = workout.exercises.reduce((sum, item) => sum + item.sets.length, 0); const volume = workout.exercises.flatMap((item) => item.sets).reduce((sum, set) => sum + set.weight * set.reps, 0); return <Pressable key={workout.id} onPress={() => setSelected(workout)} style={({ pressed }) => [styles.card, { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.75 : 1 }]}><View style={[styles.date, { backgroundColor: colors.secondary }]}><Text style={[styles.dateText, { color: colors.primary }]}>{dateLabel(workout.startedAt)}</Text></View><View style={styles.copy}><Text style={[styles.name, { color: colors.foreground }]}>{workout.routineName}</Text><Text style={[styles.meta, { color: colors.mutedForeground }]}>{Math.floor(workout.durationSeconds / 60)} min · {sets} series · {Math.round(volume)} kg</Text></View><Feather name="chevron-right" size={19} color={colors.mutedForeground} /></Pressable>; })}<Modal visible={selected !== null} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setSelected(null)}>{selected ? <WorkoutDetail workout={selected} onClose={() => setSelected(null)} /> : null}</Modal></Screen>;
+  return <Screen><Header title="Historial" subtitle="Tu recorrido, una sesión a la vez" />{workouts.length === 0 ? <EmptyState icon="clock" title="Todavía no hay entrenamientos" description="Cuando termines una sesión, aparecerá aquí con todos sus detalles." /> : workouts.map((workout) => { const sets = workout.exercises.reduce((sum, item) => sum + item.sets.length, 0); const volume = workout.exercises.flatMap((item) => item.sets).reduce((sum, set) => sum + set.weight * set.reps, 0); return <Pressable key={workout.id} onPress={() => setSelected(workout)} style={({ pressed }) => [styles.card, { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.75 : 1 }]}><View style={[styles.date, { backgroundColor: colors.secondary }]}><Text style={[styles.dateText, { color: colors.primary }]}>{dateLabel(workout.startedAt)}</Text></View><View style={styles.copy}><Text style={[styles.name, { color: colors.foreground }]}>{workout.routineName}</Text><Text style={[styles.meta, { color: colors.mutedForeground }]}>{Math.floor(workout.durationSeconds / 60)} min · {sets} series · {Math.round(volume)} kg</Text></View><Feather name="chevron-right" size={19} color={colors.mutedForeground} /></Pressable>; })}
+    {selected ? <View style={styles.sheetOverlay}><View style={styles.sheetContainer}><WorkoutDetail workout={selected} onClose={() => setSelected(null)} /></View></View> : null}
+  </Screen>;
 }
 
 function WorkoutDetail({ workout, onClose }: { workout: Workout; onClose: () => void }) {
@@ -35,6 +37,8 @@ const styles = StyleSheet.create({
   copy: { flex: 1 },
   name: { fontSize: 15, fontWeight: '700' },
   meta: { fontSize: 12, marginTop: 5 },
+  sheetOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end', zIndex: 9999 },
+  sheetContainer: { backgroundColor: '#fff', borderTopLeftRadius: 22, borderTopRightRadius: 22, maxHeight: '92%' },
   detailRoot: { flex: 1 },
   detailScroll: { paddingHorizontal: 20 },
   detailHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 23 },
